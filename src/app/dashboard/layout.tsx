@@ -1,12 +1,15 @@
+
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { MainLayout, MainLayoutHeader, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, AppLogo } from '@/components/shared/main-layout';
 import type { NavItem } from '@/types';
 import { LayoutDashboard, QrCode, Mail } from 'lucide-react';
-import { useUser } from "@/firebase";
+import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import type { User } from "@/types";
+import { doc } from 'firebase/firestore';
 
 const navItems: NavItem[] = [
     { href: '/dashboard', title: 'Panou', icon: LayoutDashboard },
@@ -22,14 +25,21 @@ export default function DashboardLayout({
     const pathname = usePathname()
     const { user, isUserLoading } = useUser();
     const router = useRouter();
+    const firestore = useFirestore();
+
+    const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
+    const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
     
     useEffect(() => {
         if (!isUserLoading && !user) {
             router.push('/');
+        } else if (userProfile && userProfile.role !== 'user') {
+            // Redirect non-user roles away from user dashboard
+            router.push('/');
         }
-    }, [user, isUserLoading, router]);
+    }, [user, userProfile, isUserLoading, router]);
 
-    if (isUserLoading || !user) {
+    if (isUserLoading || isProfileLoading || !userProfile) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <p>Se încarcă...</p>
@@ -37,8 +47,7 @@ export default function DashboardLayout({
         );
     }
     
-    // In a real app, userRole would come from user's profile
-    const userRole = "Utilizator"
+    const userRole = userProfile.role;
 
     return (
         <MainLayout>

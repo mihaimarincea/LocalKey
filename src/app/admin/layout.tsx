@@ -1,13 +1,15 @@
+
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { MainLayout, MainLayoutHeader, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, AppLogo } from '@/components/shared/main-layout';
 import type { NavItem } from '@/types';
 import { LayoutDashboard, Users, Building, Gift, Mail, CreditCard, BarChart } from 'lucide-react';
-import { useUser } from "@/firebase";
+import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
+import type { User } from "@/types";
+import { doc } from 'firebase/firestore';
 
 const navItems: NavItem[] = [
     { href: '/admin/dashboard', title: 'Panou', icon: LayoutDashboard },
@@ -27,15 +29,20 @@ export default function AdminLayout({
     const pathname = usePathname()
     const { user, isUserLoading } = useUser();
     const router = useRouter();
-    
+    const firestore = useFirestore();
+
+    const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
+    const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
+
     useEffect(() => {
         if (!isUserLoading && !user) {
             router.push('/');
+        } else if (userProfile && userProfile.role !== 'admin') {
+            router.push('/dashboard');
         }
-        // TODO: Add role check to redirect non-admin users
-    }, [user, isUserLoading, router]);
+    }, [user, userProfile, isUserLoading, router]);
 
-    if (isUserLoading || !user) {
+    if (isUserLoading || isProfileLoading || !userProfile) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <p>Se încarcă...</p>
@@ -43,7 +50,7 @@ export default function AdminLayout({
         );
     }
 
-    const userRole = "Admin"
+    const userRole = userProfile.role;
 
     return (
         <MainLayout>

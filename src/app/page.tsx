@@ -1,3 +1,4 @@
+
 'use client';
 import Image from 'next/image';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
@@ -6,21 +7,36 @@ import {LoginForm} from '@/components/auth/login-form';
 import {SignupForm} from '@/components/auth/signup-form';
 import AppLogo from '@/components/shared/app-logo';
 import {PlaceHolderImages} from '@/lib/placeholder-images';
-import { useUser } from '@/firebase';
+import { useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import type { User } from '@/types';
+import { doc } from 'firebase/firestore';
 
 export default function AuthPage() {
   const bgImage = PlaceHolderImages.find(img => img.id === "auth-background");
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      // TODO: Add role based routing
-      router.push('/dashboard');
+    if (!isUserLoading && !isProfileLoading && user && userProfile) {
+        switch (userProfile.role) {
+            case 'admin':
+                router.push('/admin/dashboard');
+                break;
+            case 'partner':
+                router.push('/partner/dashboard');
+                break;
+            default:
+                router.push('/dashboard');
+                break;
+        }
     }
-  }, [user, isUserLoading, router]);
+  }, [user, userProfile, isUserLoading, isProfileLoading, router]);
 
   if (isUserLoading || user) {
     return (
@@ -67,7 +83,7 @@ export default function AuthPage() {
                 <CardHeader>
                   <CardTitle>Înregistrare</CardTitle>
                   <CardDescription>
-                    Introdu un cod de invitație și datele tale pentru a crea un cont.
+                    Introdu datele tale pentru a crea un cont.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

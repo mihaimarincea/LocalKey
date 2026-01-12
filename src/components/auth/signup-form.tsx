@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from 'react-hook-form';
@@ -11,14 +12,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 const signupSchema = z.object({
   email: z.string().email({ message: "Adresă de email invalidă." }),
   password: z.string().min(8, { message: "Parola trebuie să aibă cel puțin 8 caractere." }),
-  inviteCode: z.string().min(4, { message: "Codul de invitație este obligatoriu." }),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -41,18 +41,22 @@ export function SignupForm() {
   const onSubmit = async (data: SignupFormValues) => {
     setLoading(true);
     try {
-      // TODO: Validate invite code against Firestore before creating user
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
-      // Create user profile in Firestore
-      await setDoc(doc(firestore, "users", user.uid), {
+      const userDocRef = doc(firestore, "users", user.uid);
+      const newUser = {
         id: user.uid,
         email: user.email,
+        name: user.email?.split('@')[0] || 'Utilizator nou',
+        avatarUrl: `https://avatar.vercel.sh/${user.email}.png`,
         role: "user", // default role
         createdAt: new Date(),
-        inviteCodes: [],
-      });
+        inviteCodeCount: 0,
+      };
+      
+      // Create user profile in Firestore
+      setDocumentNonBlocking(userDocRef, newUser, { merge: true });
       
       toast({
         title: "Cont Creat!",
@@ -64,7 +68,7 @@ export function SignupForm() {
       toast({
         variant: "destructive",
         title: "Eroare la Înregistrare",
-        description: error.message || "Nu s-a putut crea contul. Verificați codul de invitație și încercați din nou.",
+        description: error.message || "Nu s-a putut crea contul. Încercați din nou.",
       });
     } finally {
       setLoading(false);
@@ -73,11 +77,6 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="invite-code">Cod de Invitație</Label>
-        <Input id="invite-code" placeholder="LOCAL-XXXX" {...register('inviteCode')} />
-        {errors.inviteCode && <p className="text-xs text-destructive">{errors.inviteCode.message}</p>}
-      </div>
       <div className="grid gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
