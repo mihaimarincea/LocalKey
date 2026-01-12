@@ -15,7 +15,7 @@ const GenerateFraudAlertsInputSchema = z.object({});
 export type GenerateFraudAlertsInput = z.infer<typeof GenerateFraudAlertsInputSchema>;
 
 const GenerateFraudAlertsOutputSchema = z.object({
-  alert: z.string().describe('A detailed fraud alert message based on usage patterns.'),
+  alert: z.string().describe('Un mesaj detaliat de alertă de fraudă bazat pe modelele de utilizare.'),
 });
 export type GenerateFraudAlertsOutput = z.infer<typeof GenerateFraudAlertsOutputSchema>;
 
@@ -27,16 +27,16 @@ const prompt = ai.definePrompt({
   name: 'generateFraudAlertsPrompt',
   input: {schema: GenerateFraudAlertsInputSchema},
   output: {schema: GenerateFraudAlertsOutputSchema},
-  prompt: `You are a fraud detection expert analyzing user redemption patterns and device fingerprinting data to identify suspicious activities.
+  prompt: `Ești un expert în detectarea fraudelor care analizează modelele de răscumpărare ale utilizatorilor și datele de amprentare a dispozitivelor pentru a identifica activități suspecte.
 
-  Analyze the provided data (if any) and generate a detailed fraud alert message if suspicious activity is detected. Consider factors such as redemption frequency, device consistency, and invite code usage.
+  Analizează datele furnizate (dacă există) și generează un mesaj detaliat de alertă de fraudă dacă este detectată o activitate suspectă. Ia în considerare factori precum frecvența răscumpărărilor, consistența dispozitivelor și utilizarea codurilor de invitație.
 
-  Data:
-  - User redemption frequency: {{redemptionFrequency}}
-  - Device consistency: {{deviceConsistency}}
-  - Invite code usage: {{inviteCodeUsage}}
+  Date:
+  - Frecvența răscumpărărilor utilizatorului: {{redemptionFrequency}}
+  - Consistența dispozitivului: {{deviceConsistency}}
+  - Utilizarea codului de invitație: {{inviteCodeUsage}}
 
-  Alert:`, // Modified prompt to expect dynamic data.
+  Alertă:`,
 });
 
 const generateFraudAlertsFlow = ai.defineFlow(
@@ -48,9 +48,9 @@ const generateFraudAlertsFlow = ai.defineFlow(
   async input => {
     // TODO: Fetch actual redemption frequency, device consistency, and invite code usage data here.
     // This is placeholder data for now.
-    const redemptionFrequency = 'High redemption rate observed in the last 24 hours.';
-    const deviceConsistency = 'Multiple devices used within a short timeframe.';
-    const inviteCodeUsage = 'Unusual number of invite codes redeemed.';
+    const redemptionFrequency = 'Rată mare de răscumpărare observată în ultimele 24 de ore.';
+    const deviceConsistency = 'Mai multe dispozitive utilizate într-un interval scurt de timp.';
+    const inviteCodeUsage = 'Număr neobișnuit de coduri de invitație răscumpărate.';
 
     const {output} = await prompt({
       ...input,

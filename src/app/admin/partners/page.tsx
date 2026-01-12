@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { mockPartners } from "@/lib/data"
 import { format } from "date-fns"
+import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -30,15 +31,15 @@ export default function AdminPartnersPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Partners</CardTitle>
+          <CardTitle>Parteneri</CardTitle>
           <CardDescription>
-            Manage all partners on the platform.
+            Gestionează toți partenerii de pe platformă.
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Partner
+            Adaugă Partener
           </span>
         </Button>
       </CardHeader>
@@ -46,19 +47,19 @@ export default function AdminPartnersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
+              <TableHead>Nume</TableHead>
               <TableHead>Email</TableHead>
               <TableHead className="hidden md:table-cell">
-                Offers
+                Oferte
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                Redemptions
+                Răscumpărări
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                Joined Date
+                Data Aderării
               </TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acțiuni</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -74,22 +75,22 @@ export default function AdminPartnersPage() {
                   {partner.totalRedemptions.toLocaleString()}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(partner.createdAt, "PPP")}
+                  {format(partner.createdAt, "PPP", { locale: ro })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Comută meniu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Dashboard</DropdownMenuItem>
+                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
+                      <DropdownMenuItem>Editează</DropdownMenuItem>
+                      <DropdownMenuItem>Vezi Panou</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Deactivate
+                        Dezactivează
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

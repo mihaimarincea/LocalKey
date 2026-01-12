@@ -46,8 +46,8 @@ export function QrCodeGenerator() {
       return () => clearInterval(timer);
     } else if (timeLeft === 0 && qrCodeUrl) {
         toast({
-            title: "QR Code Expired",
-            description: "Please generate a new code for redemption.",
+            title: "Cod QR Expirat",
+            description: "Te rugăm să generezi un nou cod pentru răscumpărare.",
             variant: "destructive"
         })
     }
@@ -59,8 +59,8 @@ export function QrCodeGenerator() {
   return (
     <Card className="w-full max-w-sm text-center shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Your Personal QR Code</CardTitle>
-        <CardDescription>Present this to the partner to redeem your offer.</CardDescription>
+        <CardTitle className="text-2xl">Codul Tău QR Personal</CardTitle>
+        <CardDescription>Prezintă acest cod partenerului pentru a răscumpăra oferta.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center gap-4">
         <div className="relative w-[300px] h-[300px] flex items-center justify-center">
@@ -69,7 +69,7 @@ export function QrCodeGenerator() {
             <>
               <Image
                 src={qrCodeUrl}
-                alt="Your personal QR code"
+                alt="Codul tău QR personal"
                 width={300}
                 height={300}
                 className={`transition-opacity duration-500 ${isExpired ? "opacity-10" : "opacity-100"}`}
@@ -78,7 +78,7 @@ export function QrCodeGenerator() {
               {isExpired && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
                   <ShieldOff className="h-16 w-16 text-destructive" />
-                  <p className="mt-2 font-bold text-destructive">EXPIRED</p>
+                  <p className="mt-2 font-bold text-destructive">EXPIRAT</p>
                 </div>
               )}
             </>
@@ -86,26 +86,26 @@ export function QrCodeGenerator() {
           {!loading && !qrCodeUrl && (
              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
                 <WifiOff className="h-16 w-16 text-muted-foreground" />
-                <p className="mt-2 font-bold text-muted-foreground">Could not generate QR code</p>
+                <p className="mt-2 font-bold text-muted-foreground">Nu s-a putut genera codul QR</p>
             </div>
           )}
         </div>
         <div className="w-full space-y-2">
             <Progress value={progress} className="h-2" />
             <p className={`text-sm font-mono ${isExpired ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {isExpired ? "Code expired" : `Expires in ${timeLeft}s`}
+                {isExpired ? "Cod expirat" : `Expiră în ${timeLeft}s`}
             </p>
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-4">
         {isExpired ? (
             <Button onClick={generateQrCode} className="w-full">
-                Generate New Code
+                Generează Cod Nou
             </Button>
         ) : (
             <div className="flex items-center text-sm text-green-700 dark:text-green-400 p-2 bg-green-50 dark:bg-green-950 rounded-md">
                 <ShieldCheck className="h-4 w-4 mr-2" />
-                <span>Your code is active and secure.</span>
+                <span>Codul tău este activ și securizat.</span>
             </div>
         )}
       </CardFooter>

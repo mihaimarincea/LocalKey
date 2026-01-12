@@ -16,17 +16,17 @@ import {
 } from "@/components/ui/chart"
 
 const chartData = [
-  { month: "January", redemptions: 186 },
-  { month: "February", redemptions: 305 },
-  { month: "March", redemptions: 237 },
-  { month: "April", redemptions: 273 },
-  { month: "May", redemptions: 209 },
-  { month: "June", redemptions: 214 },
+  { month: "Ianuarie", redemptions: 186 },
+  { month: "Februarie", redemptions: 305 },
+  { month: "Martie", redemptions: 237 },
+  { month: "Aprilie", redemptions: 273 },
+  { month: "Mai", redemptions: 209 },
+  { month: "Iunie", redemptions: 214 },
 ]
 
 const chartConfig = {
   redemptions: {
-    label: "Redemptions",
+    label: "Răscumpărări",
     color: "hsl(var(--primary))",
   },
 }
@@ -35,8 +35,8 @@ export function StatsChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Redemptions Overview</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Prezentare Generală Răscumpărări</CardTitle>
+        <CardDescription>Ianuarie - Iunie 2024</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[200px] w-full">

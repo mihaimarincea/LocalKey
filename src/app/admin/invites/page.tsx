@@ -30,15 +30,15 @@ export default function AdminInvitesPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Invite Codes</CardTitle>
+          <CardTitle>Coduri de Invitație</CardTitle>
           <CardDescription>
-            Manage and track all invitation codes.
+            Gestionează și urmărește toate codurile de invitație.
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Generate Codes
+            Generează Coduri
           </span>
         </Button>
       </CardHeader>
@@ -46,12 +46,12 @@ export default function AdminInvitesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Invited By (ID)</TableHead>
-              <TableHead className="hidden md:table-cell">Used By (ID)</TableHead>
+              <TableHead>Cod</TableHead>
+              <TableHead>Stare</TableHead>
+              <TableHead className="hidden md:table-cell">Invitat de (ID)</TableHead>
+              <TableHead className="hidden md:table-cell">Folosit de (ID)</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acțiuni</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -61,7 +61,7 @@ export default function AdminInvitesPage() {
                 <TableCell className="font-mono">{invite.code}</TableCell>
                 <TableCell>
                   <Badge variant={invite.status === 'used' ? "secondary" : "default"}>
-                    {invite.status}
+                    {invite.status === 'used' ? 'Folosit' : 'Disponibil'}
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
@@ -75,14 +75,14 @@ export default function AdminInvitesPage() {
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Comută meniu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
+                      <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Revoke
+                        Revocă
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

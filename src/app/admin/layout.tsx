@@ -6,13 +6,13 @@ import type { NavItem } from '@/types';
 import { LayoutDashboard, Users, Building, Gift, Mail, CreditCard, BarChart } from 'lucide-react';
 
 const navItems: NavItem[] = [
-    { href: '/admin/dashboard', title: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/users', title: 'Users', icon: Users },
-    { href: '/admin/partners', title: 'Partners', icon: Building },
-    { href: '/admin/offers', title: 'Offers', icon: Gift },
-    { href: '/admin/invites', title: 'Invites', icon: Mail },
-    { href: '/admin/payments', title: 'Payments', icon: CreditCard },
-    { href: '/admin/reports', title: 'Reports', icon: BarChart },
+    { href: '/admin/dashboard', title: 'Panou', icon: LayoutDashboard },
+    { href: '/admin/users', title: 'Utilizatori', icon: Users },
+    { href: '/admin/partners', title: 'Parteneri', icon: Building },
+    { href: '/admin/offers', title: 'Oferte', icon: Gift },
+    { href: '/admin/invites', title: 'Invitații', icon: Mail },
+    { href: '/admin/payments', title: 'Plăți', icon: CreditCard },
+    { href: '/admin/reports', title: 'Rapoarte', icon: BarChart },
 ];
 
 export default function AdminLayout({
@@ -49,7 +49,7 @@ export default function AdminLayout({
                 </SidebarContent>
                 <SidebarFooter>
                     <div className="text-xs text-muted-foreground p-2 text-center group-data-[collapsible=icon]:hidden">
-                        <p>Logged in as {userRole}</p>
+                        <p>Autentificat ca {userRole}</p>
                     </div>
                 </SidebarFooter>
             </Sidebar>

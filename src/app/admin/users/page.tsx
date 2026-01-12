@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { mockUsers } from "@/lib/data"
 import { format } from "date-fns"
+import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -32,15 +33,15 @@ export default function AdminUsersPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Users</CardTitle>
+          <CardTitle>Utilizatori</CardTitle>
           <CardDescription>
-            Manage all users on the platform.
+            Gestionează toți utilizatorii de pe platformă.
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add User
+            Adaugă Utilizator
           </span>
         </Button>
       </CardHeader>
@@ -49,18 +50,18 @@ export default function AdminUsersPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="hidden w-[100px] sm:table-cell">
-                <span className="sr-only">Image</span>
+                <span className="sr-only">Imagine</span>
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>Nume</TableHead>
+              <TableHead>Rol</TableHead>
               <TableHead className="hidden md:table-cell">
-                Invites
+                Invitații
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                Created at
+                Creat la
               </TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acțiuni</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -69,7 +70,7 @@ export default function AdminUsersPage() {
               <TableRow key={user.id}>
                 <TableCell className="hidden sm:table-cell">
                   <Image
-                    alt="User avatar"
+                    alt="Avatar utilizator"
                     className="aspect-square rounded-full object-cover"
                     height="64"
                     src={user.avatarUrl}
@@ -84,22 +85,22 @@ export default function AdminUsersPage() {
                   {user.inviteCodeCount}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(user.createdAt, "PPP")}
+                  {format(user.createdAt, "PPP", { locale: ro })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Comută meniu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
+                      <DropdownMenuItem>Editează</DropdownMenuItem>
+                      <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Suspend
+                        Suspendă
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

@@ -28,19 +28,19 @@ export function MapView({ offers }: MapViewProps) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Offers Near You</CardTitle>
-        <CardDescription>Find deals in your area. Click on a pin to see details.</CardDescription>
+        <CardTitle>Oferte Lângă Tine</CardTitle>
+        <CardDescription>Găsește oferte în zona ta. Apasă pe un pin pentru detalii.</CardDescription>
       </CardHeader>
       <CardContent>
         <div 
             className="relative flex h-[500px] w-full items-center justify-center rounded-lg border-2 border-dashed bg-secondary"
-            aria-label="Map placeholder"
+            aria-label="Placeholder Hartă"
         >
           <div className="text-center text-muted-foreground">
             <MapPin className="mx-auto h-12 w-12" />
-            <p className="mt-2 font-semibold">Map View</p>
-            <p className="mt-1 text-sm">A real map would show {offers.length} offers near you.</p>
-            <p className="mt-4 text-xs">To enable, add your Google Maps API Key.</p>
+            <p className="mt-2 font-semibold">Vizualizare Hartă</p>
+            <p className="mt-1 text-sm">O hartă reală ar afișa {offers.length} oferte lângă tine.</p>
+            <p className="mt-4 text-xs">Pentru a activa, adaugă cheia ta API Google Maps.</p>
           </div>
         </div>
       </CardContent>

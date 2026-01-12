@@ -22,8 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  email: z.string().email({ message: "Adresă de email invalidă." }),
+  password: z.string().min(6, { message: "Parola trebuie să aibă cel puțin 6 caractere." }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -43,14 +43,14 @@ export function LoginForm() {
 
   const onSubmit = (data: LoginFormValues) => {
     setLoading(true);
-    console.log("Login data:", data);
+    console.log("Date autentificare:", data);
 
-    // Simulate API call
+    // Simulare apel API
     setTimeout(() => {
       setLoading(false);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Autentificare Reușită",
+        description: "Bun venit înapoi!",
       });
       setShowSuccessDialog(true);
     }, 1500);
@@ -64,16 +64,16 @@ export function LoginForm() {
           <Input
             id="email"
             type="email"
-            placeholder="m@example.com"
+            placeholder="m@exemplu.com"
             {...register('email')}
           />
           {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Parolă</Label>
             <Link href="#" className="ml-auto inline-block text-sm underline">
-              Forgot your password?
+              Ai uitat parola?
             </Link>
           </div>
           <Input id="password" type="password" {...register('password')} />
@@ -81,30 +81,30 @@ export function LoginForm() {
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Login
+          Autentificare
         </Button>
         <Button variant="outline" className="w-full">
-          Login with SMS OTP
+          Autentificare cu SMS OTP
         </Button>
       </form>
 
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Login Successful!</AlertDialogTitle>
+            <AlertDialogTitle>Autentificare Reușită!</AlertDialogTitle>
             <AlertDialogDescription>
-              Since this is a demo, you can navigate to any of the dashboards.
+              Fiind o aplicație demonstrativă, poți naviga la oricare dintre panourile de control.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
             <AlertDialogAction asChild>
-              <Link href="/dashboard">Go to User Dashboard</Link>
+              <Link href="/dashboard">Mergi la Panoul Utilizatorului</Link>
             </AlertDialogAction>
             <AlertDialogAction asChild>
-              <Link href="/partner/dashboard">Go to Partner Dashboard</Link>
+              <Link href="/partner/dashboard">Mergi la Panoul Partenerului</Link>
             </AlertDialogAction>
             <AlertDialogAction asChild>
-               <Link href="/admin/dashboard">Go to Admin Dashboard</Link>
+               <Link href="/admin/dashboard">Mergi la Panoul de Administrare</Link>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

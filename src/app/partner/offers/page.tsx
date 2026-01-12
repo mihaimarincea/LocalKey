@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { mockOffers } from "@/lib/data"
 import { format } from "date-fns"
+import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -35,15 +36,15 @@ export default function PartnerOffersPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Your Offers</CardTitle>
+          <CardTitle>Ofertele Tale</CardTitle>
           <CardDescription>
-            Manage your active and paused offers.
+            Gestionează ofertele tale active și inactive.
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Offer
+            Adaugă Ofertă
           </span>
         </Button>
       </CardHeader>
@@ -51,12 +52,12 @@ export default function PartnerOffersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Offer</TableHead>
-              <TableHead className="hidden md:table-cell">Category</TableHead>
-              <TableHead className="hidden md:table-cell">Expires</TableHead>
+              <TableHead>Stare</TableHead>
+              <TableHead>Ofertă</TableHead>
+              <TableHead className="hidden md:table-cell">Categorie</TableHead>
+              <TableHead className="hidden md:table-cell">Expiră la</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acțiuni</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -65,9 +66,9 @@ export default function PartnerOffersPage() {
               <TableRow key={offer.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Switch id={`status-${offer.id}`} checked={!offer.isPaused} aria-label="Toggle offer status" />
+                    <Switch id={`status-${offer.id}`} checked={!offer.isPaused} aria-label="Comută starea ofertei" />
                      <Badge variant={offer.isPaused ? "secondary" : "default"}>
-                        {offer.isPaused ? "Paused" : "Active"}
+                        {offer.isPaused ? "Pauză" : "Activă"}
                      </Badge>
                   </div>
                 </TableCell>
@@ -76,22 +77,22 @@ export default function PartnerOffersPage() {
                   {offer.category}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(offer.expiresAt, "PPP")}
+                  {format(offer.expiresAt, "PPP", { locale: ro })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Comută meniu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Stats</DropdownMenuItem>
+                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
+                      <DropdownMenuItem>Editează</DropdownMenuItem>
+                      <DropdownMenuItem>Vezi Statistici</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Delete
+                        Șterge
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

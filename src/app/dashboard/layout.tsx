@@ -6,9 +6,9 @@ import type { NavItem } from '@/types';
 import { LayoutDashboard, QrCode, Mail } from 'lucide-react';
 
 const navItems: NavItem[] = [
-    { href: '/dashboard', title: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/qr', title: 'Get QR Code', icon: QrCode },
-    { href: '/dashboard/invites', title: 'Invites', icon: Mail },
+    { href: '/dashboard', title: 'Panou', icon: LayoutDashboard },
+    { href: '/dashboard/qr', title: 'Obține Cod QR', icon: QrCode },
+    { href: '/dashboard/invites', title: 'Invitații', icon: Mail },
 ];
 
 export default function DashboardLayout({
@@ -17,7 +17,7 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname()
-    const userRole = "User"
+    const userRole = "Utilizator"
 
     return (
         <MainLayout>
@@ -45,7 +45,7 @@ export default function DashboardLayout({
                 </SidebarContent>
                 <SidebarFooter>
                     <div className="text-xs text-muted-foreground p-2 text-center group-data-[collapsible=icon]:hidden">
-                        <p>Logged in as {userRole}</p>
+                        <p>Autentificat ca {userRole}</p>
                     </div>
                 </SidebarFooter>
             </Sidebar>

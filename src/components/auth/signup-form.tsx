@@ -22,9 +22,9 @@ import {
 } from '../ui/alert-dialog';
 
 const signupSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
-  inviteCode: z.string().min(4, { message: "Invite code is required." }),
+  email: z.string().email({ message: "Adresă de email invalidă." }),
+  password: z.string().min(8, { message: "Parola trebuie să aibă cel puțin 8 caractere." }),
+  inviteCode: z.string().min(4, { message: "Codul de invitație este obligatoriu." }),
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
@@ -44,14 +44,14 @@ export function SignupForm() {
 
   const onSubmit = (data: SignupFormValues) => {
     setLoading(true);
-    console.log("Signup data:", data);
+    console.log("Date înregistrare:", data);
 
-    // Simulate API call
+    // Simulare apel API
     setTimeout(() => {
       setLoading(false);
       toast({
-        title: "Account Created!",
-        description: "Welcome to LOCALKEY.",
+        title: "Cont Creat!",
+        description: "Bun venit la LOCALKEY.",
       });
       setShowSuccessDialog(true);
     }, 1500);
@@ -61,7 +61,7 @@ export function SignupForm() {
     <>
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="invite-code">Invite Code</Label>
+          <Label htmlFor="invite-code">Cod de Invitație</Label>
           <Input id="invite-code" placeholder="LOCAL-XXXX" {...register('inviteCode')} />
           {errors.inviteCode && <p className="text-xs text-destructive">{errors.inviteCode.message}</p>}
         </div>
@@ -70,38 +70,38 @@ export function SignupForm() {
           <Input
             id="email"
             type="email"
-            placeholder="m@example.com"
+            placeholder="m@exemplu.com"
             {...register('email')}
           />
           {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Parolă</Label>
           <Input id="password" type="password" {...register('password')} />
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create account
+          Creează cont
         </Button>
       </form>
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Signup Successful!</AlertDialogTitle>
+            <AlertDialogTitle>Înregistrare Reușită!</AlertDialogTitle>
             <AlertDialogDescription>
-              Welcome! Since this is a demo, you can navigate to any of the dashboards to explore.
+              Bun venit! Fiind o aplicație demonstrativă, poți naviga la oricare dintre panourile de control pentru a explora.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
             <AlertDialogAction asChild>
-              <Link href="/dashboard">Go to User Dashboard</Link>
+              <Link href="/dashboard">Mergi la Panoul Utilizatorului</Link>
             </AlertDialogAction>
             <AlertDialogAction asChild>
-              <Link href="/partner/dashboard">Go to Partner Dashboard</Link>
+              <Link href="/partner/dashboard">Mergi la Panoul Partenerului</Link>
             </AlertDialogAction>
             <AlertDialogAction asChild>
-               <Link href="/admin/dashboard">Go to Admin Dashboard</Link>
+               <Link href="/admin/dashboard">Mergi la Panoul de Administrare</Link>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

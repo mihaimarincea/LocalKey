@@ -6,9 +6,9 @@ import type { NavItem } from '@/types';
 import { LayoutDashboard, List, ScanLine } from 'lucide-react';
 
 const navItems: NavItem[] = [
-    { href: '/partner/dashboard', title: 'Dashboard', icon: LayoutDashboard },
-    { href: '/partner/scan', title: 'Scan QR Code', icon: ScanLine },
-    { href: '/partner/offers', title: 'Manage Offers', icon: List },
+    { href: '/partner/dashboard', title: 'Panou', icon: LayoutDashboard },
+    { href: '/partner/scan', title: 'Scanează Cod QR', icon: ScanLine },
+    { href: '/partner/offers', title: 'Gestionează Oferte', icon: List },
 ];
 
 export default function PartnerLayout({
@@ -17,7 +17,7 @@ export default function PartnerLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname()
-    const userRole = "Partner"
+    const userRole = "Partener"
 
     return (
         <MainLayout>
@@ -45,7 +45,7 @@ export default function PartnerLayout({
                 </SidebarContent>
                 <SidebarFooter>
                     <div className="text-xs text-muted-foreground p-2 text-center group-data-[collapsible=icon]:hidden">
-                        <p>Logged in as {userRole}</p>
+                        <p>Autentificat ca {userRole}</p>
                     </div>
                 </SidebarFooter>
             </Sidebar>

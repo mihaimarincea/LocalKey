@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
+import { ro } from "date-fns/locale"
 import {
   Card,
   CardContent,
@@ -50,10 +51,10 @@ export function OfferCard({ offer }: OfferCardProps) {
         <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                <span>Expires {formatDistanceToNow(offer.expiresAt, { addSuffix: true })}</span>
+                <span>Expiră {formatDistanceToNow(offer.expiresAt, { addSuffix: true, locale: ro })}</span>
             </div>
             <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
-                <Link href="/dashboard/qr">Redeem</Link>
+                <Link href="/dashboard/qr">Răscumpără</Link>
             </Button>
         </div>
       </CardFooter>

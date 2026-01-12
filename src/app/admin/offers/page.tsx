@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { mockOffers } from "@/lib/data"
 import { format } from "date-fns"
+import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -31,15 +32,15 @@ export default function AdminOffersPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Offers</CardTitle>
+          <CardTitle>Oferte</CardTitle>
           <CardDescription>
-            Manage all offers on the platform.
+            Gestionează toate ofertele de pe platformă.
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Add Offer
+            Adaugă Ofertă
           </span>
         </Button>
       </CardHeader>
@@ -47,12 +48,12 @@ export default function AdminOffersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Offer Title</TableHead>
-              <TableHead className="hidden md:table-cell">Partner</TableHead>
-              <TableHead className="hidden md:table-cell">Expires</TableHead>
+              <TableHead>Stare</TableHead>
+              <TableHead>Titlu Ofertă</TableHead>
+              <TableHead className="hidden md:table-cell">Partener</TableHead>
+              <TableHead className="hidden md:table-cell">Expiră la</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Acțiuni</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -61,7 +62,7 @@ export default function AdminOffersPage() {
               <TableRow key={offer.id}>
                 <TableCell>
                   <Badge variant={offer.isPaused ? "secondary" : "default"}>
-                    {offer.isPaused ? "Paused" : "Active"}
+                    {offer.isPaused ? "Pauză" : "Activă"}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-medium">{offer.title}</TableCell>
@@ -69,22 +70,22 @@ export default function AdminOffersPage() {
                   {offer.partnerName}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(offer.expiresAt, "PPP")}
+                  {format(offer.expiresAt, "PPP", { locale: ro })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Comută meniu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
+                      <DropdownMenuItem>Editează</DropdownMenuItem>
+                      <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Delete
+                        Șterge
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

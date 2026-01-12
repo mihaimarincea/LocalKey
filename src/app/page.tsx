@@ -15,22 +15,22 @@ export default function AuthPage() {
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <AppLogo />
-            <h1 className="text-3xl font-bold">Welcome</h1>
+            <h1 className="text-3xl font-bold">Bun venit</h1>
             <p className="text-balance text-muted-foreground">
-              Login or create an account to unlock local deals
+              Autentifică-te sau creează un cont pentru a debloca oferte locale
             </p>
           </div>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="login">Autentificare</TabsTrigger>
+              <TabsTrigger value="signup">Înregistrare</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <Card className="bg-transparent border-none shadow-none">
                 <CardHeader>
-                  <CardTitle>Login</CardTitle>
+                  <CardTitle>Autentificare</CardTitle>
                   <CardDescription>
-                    Enter your credentials to access your account.
+                    Introdu datele tale pentru a accesa contul.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -41,9 +41,9 @@ export default function AuthPage() {
             <TabsContent value="signup">
               <Card className="bg-transparent border-none shadow-none">
                 <CardHeader>
-                  <CardTitle>Sign Up</CardTitle>
+                  <CardTitle>Înregistrare</CardTitle>
                   <CardDescription>
-                    Enter an invite code and your details to create an account.
+                    Introdu un cod de invitație și datele tale pentru a crea un cont.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -54,7 +54,7 @@ export default function AuthPage() {
           </Tabs>
 
           <div className="mt-4 text-center text-sm">
-            &copy; {new Date().getFullYear()} LOCALKEY. All rights reserved.
+            &copy; {new Date().getFullYear()} LOCALKEY. Toate drepturile rezervate.
           </div>
         </div>
       </div>

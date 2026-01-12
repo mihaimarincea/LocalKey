@@ -26,7 +26,7 @@ export function FraudAlertGenerator() {
       const result = await generateFraudAlerts({})
       setAlert(result.alert)
     } catch (err) {
-      setError("Failed to generate fraud alert. Please try again.")
+      setError("Nu s-a putut genera alerta de fraudă. Vă rugăm să încercați din nou.")
       console.error(err)
     } finally {
       setLoading(false)
@@ -38,10 +38,10 @@ export function FraudAlertGenerator() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShieldAlert className="h-5 w-5" />
-          Fraud Detection Center
+          Centru de Detecție a Fraudei
         </CardTitle>
         <CardDescription>
-          Use GenAI to analyze usage patterns and detect potential fraud.
+          Folosește GenAI pentru a analiza modelele de utilizare și a detecta potențiale fraude.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -51,13 +51,13 @@ export function FraudAlertGenerator() {
           ) : (
             <Sparkles className="mr-2 h-4 w-4" />
           )}
-          Analyze & Generate Alert
+          Analizează și Generează Alertă
         </Button>
 
         {alert && (
           <Alert>
             <ShieldAlert className="h-4 w-4" />
-            <AlertTitle>Potential Fraud Detected!</AlertTitle>
+            <AlertTitle>Potențială Fraudă Detectată!</AlertTitle>
             <AlertDescription>{alert}</AlertDescription>
           </Alert>
         )}
@@ -65,14 +65,14 @@ export function FraudAlertGenerator() {
         {error && (
             <Alert variant="destructive">
                 <ShieldAlert className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>Eroare</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
             </Alert>
         )}
 
          {!alert && !error && !loading && (
             <div className="text-center text-muted-foreground p-4">
-                <p>Click the button to start fraud analysis.</p>
+                <p>Apasă butonul pentru a începe analiza de fraudă.</p>
             </div>
         )}
       </CardContent>

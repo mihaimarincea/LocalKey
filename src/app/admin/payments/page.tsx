@@ -5,18 +5,18 @@ export default function AdminPaymentsPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Payment Integration</CardTitle>
-                <CardDescription>Manage subscriptions and transactions via Stripe.</CardDescription>
+                <CardTitle>Integrare Plăți</CardTitle>
+                <CardDescription>Gestionează abonamente și tranzacții prin Stripe.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div 
                     className="relative flex h-96 w-full items-center justify-center rounded-lg border-2 border-dashed bg-secondary"
-                    aria-label="Payments placeholder"
+                    aria-label="Placeholder Plăți"
                 >
                   <div className="text-center text-muted-foreground">
                     <CreditCard className="mx-auto h-16 w-16" />
-                    <p className="mt-2 font-semibold">Stripe Integration</p>
-                    <p className="mt-1 text-sm">A dashboard for managing payments would appear here.</p>
+                    <p className="mt-2 font-semibold">Integrare Stripe</p>
+                    <p className="mt-1 text-sm">Aici ar apărea un panou pentru gestionarea plăților.</p>
                   </div>
                 </div>
             </CardContent>
