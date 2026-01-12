@@ -1,3 +1,76 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "auth-background",
+      "description": "A vibrant, abstract representation of local community and connection.",
+      "imageUrl": "https://images.unsplash.com/photo-1567131349667-933eb56baec0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsb2NhbCUyMG1hcmtldHxlbnwwfHx8fDE3NjgyMzg1MTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "local market"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "Avatar for a user named Alex.",
+      "imageUrl": "https://images.unsplash.com/photo-1623605931891-d5b95ee98459?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjBzbWlsaW5nfGVufDB8fHx8MTc2ODI0MjQwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person smiling"
+    },
+    {
+      "id": "user-avatar-2",
+      "description": "Avatar for a user named Maria.",
+      "imageUrl": "https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2ODI0NTg4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "offer-1",
+      "description": "An image representing a coffee shop offer.",
+      "imageUrl": "https://images.unsplash.com/photo-1529892485617-25f63cd7b1e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsYXR0ZSUyMGFydHxlbnwwfHx8fDE3NjgyMDgwNjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "latte art"
+    },
+    {
+      "id": "offer-2",
+      "description": "An image representing a bakery offer.",
+      "imageUrl": "https://images.unsplash.com/photo-1698288280603-22997a335234?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmcmVzaCUyMGJyZWFkfGVufDB8fHx8MTc2ODI0OTI1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fresh bread"
+    },
+    {
+      "id": "offer-3",
+      "description": "An image representing a bookstore offer.",
+      "imageUrl": "https://images.unsplash.com/photo-1481415004805-b5b5c1e19e9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxib29rc3RvcmUlMjBzaGVsZnxlbnwwfHx8fDE3NjgyMzg1MTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bookstore shelf"
+    },
+    {
+      "id": "offer-4",
+      "description": "An image representing a pizza restaurant offer.",
+      "imageUrl": "https://images.unsplash.com/photo-1637438333468-2ea466032288?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGl6emElMjBzbGljZXxlbnwwfHx8fDE3NjgyNDM1MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pizza slice"
+    },
+    {
+      "id": "offer-5",
+      "description": "An image representing a boutique offer.",
+      "imageUrl": "https://images.unsplash.com/photo-1540221652346-e5dd6b50f3e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjbG90aGluZyUyMHJhY2t8ZW58MHx8fHwxNzY4MTk1NjI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "clothing rack"
+    },
+    {
+      "id": "offer-6",
+      "description": "An image representing a yoga class offer.",
+      "imageUrl": "https://images.unsplash.com/photo-1562088287-bde35a1ea917?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHx5b2dhJTIwcG9zZXxlbnwwfHx8fDE3NjgyMjk0MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "yoga pose"
+    },
+    {
+      "id": "partner-logo-1",
+      "description": "Logo for The Daily Grind coffee shop.",
+      "imageUrl": "https://images.unsplash.com/photo-1607681034540-2c46cc71896d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y29mZmVlJTIwYmVhbnxlbnwwfHx8fDE3NjgyNTE0NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coffee bean"
+    },
+    {
+      "id": "partner-logo-2",
+      "description": "Logo for The Book Nook bookstore.",
+      "imageUrl": "https://images.unsplash.com/photo-1585896452649-6ede5e126800?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxvcGVuJTIwYm9va3xlbnwwfHx8fDE3NjgyMTg5NzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "open book"
+    },
+    {
+      "id": "partner-logo-3",
+      "description": "Logo for Pizza Palace.",
+      "imageUrl": "https://images.unsplash.com/photo-1692737580547-b45bb4a02356?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwaXp6YSUyMGljb258ZW58MHx8fHwxNzY4MjUxNDYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pizza icon"
+    }
+  ]
 }
