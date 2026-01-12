@@ -1,0 +1,299 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the LocalKey application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "User's phone number."
+        },
+        "inviteCodes": {
+          "type": "array",
+          "description": "List of invite codes associated with the user.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deviceId": {
+          "type": "string",
+          "description": "Device ID for fingerprinting."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role (e.g., user, partner, admin)."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "phoneNumber",
+        "role"
+      ]
+    },
+    "Partner": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Partner",
+      "type": "object",
+      "description": "Represents a partner location offering deals.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the partner entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the partner."
+        },
+        "location": {
+          "type": "string",
+          "description": "Location of the partner (e.g., address, coordinates)."
+        },
+        "contactEmail": {
+          "type": "string",
+          "description": "Contact email for the partner.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "location",
+        "contactEmail"
+      ]
+    },
+    "Offer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Offer",
+      "type": "object",
+      "description": "Represents an offer available to users.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the offer entity."
+        },
+        "partnerId": {
+          "type": "string",
+          "description": "Reference to Partner. (Relationship: Partner 1:N Offer)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the offer."
+        },
+        "validFrom": {
+          "type": "string",
+          "description": "Date and time when the offer becomes valid.",
+          "format": "date-time"
+        },
+        "validUntil": {
+          "type": "string",
+          "description": "Date and time when the offer expires.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "partnerId",
+        "description",
+        "validFrom",
+        "validUntil"
+      ]
+    },
+    "Redemption": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Redemption",
+      "type": "object",
+      "description": "Represents a user redeeming an offer at a partner location.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the redemption record."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Redemption)"
+        },
+        "offerId": {
+          "type": "string",
+          "description": "Reference to Offer. (Relationship: Offer 1:N Redemption)"
+        },
+        "partnerId": {
+          "type": "string",
+          "description": "Reference to Partner. (Relationship: Partner 1:N Redemption)"
+        },
+        "redemptionTime": {
+          "type": "string",
+          "description": "Date and time when the offer was redeemed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "offerId",
+        "partnerId",
+        "redemptionTime"
+      ]
+    },
+    "InviteCode": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InviteCode",
+      "type": "object",
+      "description": "Represents an invitation code for new users.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the invite code."
+        },
+        "code": {
+          "type": "string",
+          "description": "The invite code itself."
+        },
+        "inviterId": {
+          "type": "string",
+          "description": "Reference to the user who generated the invite code. (Relationship: User 1:N InviteCode)"
+        },
+        "redeemedByUserId": {
+          "type": "string",
+          "description": "Reference to the user who redeemed the invite code (if redeemed). (Relationship: User 1:N InviteCode)"
+        },
+        "redeemedAt": {
+          "type": "string",
+          "description": "Timestamp when the invite code was redeemed. ",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "inviterId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles.  Each document is keyed by the user's unique Firebase Auth ID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Auth ID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/partners/{partnerId}",
+        "definition": {
+          "entityName": "Partner",
+          "schema": {
+            "$ref": "#/backend/entities/Partner"
+          },
+          "description": "Stores partner profiles. Each document is keyed by a unique Partner ID.",
+          "params": [
+            {
+              "name": "partnerId",
+              "description": "The unique identifier for the partner."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/offers/{offerId}",
+        "definition": {
+          "entityName": "Offer",
+          "schema": {
+            "$ref": "#/backend/entities/Offer"
+          },
+          "description": "Stores offer details. Includes the partnerId for retrieving offers by partner.",
+          "params": [
+            {
+              "name": "offerId",
+              "description": "The unique identifier for the offer."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/redemptions/{redemptionId}",
+        "definition": {
+          "entityName": "Redemption",
+          "schema": {
+            "$ref": "#/backend/entities/Redemption"
+          },
+          "description": "Stores redemption records for each user. Includes userId, offerId, and partnerId for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Auth ID of the user."
+            },
+            {
+              "name": "redemptionId",
+              "description": "The unique identifier for the redemption record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/invite_codes/{inviteCodeId}",
+        "definition": {
+          "entityName": "InviteCode",
+          "schema": {
+            "$ref": "#/backend/entities/InviteCode"
+          },
+          "description": "Stores invite codes generated by users. Each code is associated with the inviter's userId.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Auth ID of the user who generated the invite code."
+            },
+            {
+              "name": "inviteCodeId",
+              "description": "The unique identifier for the invite code."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Marks a user as an administrator. The existence of a document with the user's ID in this collection grants admin privileges.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Auth ID of the administrator."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed to support the LocalKey application's core features, including user authentication, QR code generation for offer redemptions, usage tracking, and an invitation system, while prioritizing security and scalability. The structure emphasizes authorization independence through denormalization and structural segregation to simplify security rules and enable secure list operations. The design incorporates the principles of DBAC (Database-Based Access Control) using only `request.auth.uid` and avoids custom claims. Collaborative data is modeled using Membership Maps. It provides clarity and predictability through explicit state modeling, predictable schema, and radical consistency in naming conventions.\n\n**Authorization Independence (Denormalization):**\n\n*   The `offers` collection includes the `partnerId`, which allows retrieval of offers associated with a partner without needing to perform a collection group query or read across multiple collections. The `redemptions` collection contains both `userId`, `offerId`, and `partnerId` so no `get()` operations are needed in rules.\n\n**Structural Segregation (Homogeneous Security Posture):**\n\n*   User-specific data (redemptions and invite codes) is stored within `/users/{userId}/...` subcollections. This structural segregation allows simple path-based rules for user-owned data.\n*   Partner and Offer data are stored in top-level collections (`/partners`, `/offers`). This segregation allows specific rules to be applied to offers and partners independently.\n\n**Access Modeling:**\n\n*   **Private Data:** Redemptions and invite codes are stored in `/users/{userId}/...` to ensure only the user (or admin) can access them.\n*   **User-Owned Data:** Subcollections under `/users/{userId}` follow a hierarchical path for user-owned data, simplifying ownership-based security rules.\n*   **Collaborative Data:** While not explicitly collaborative in this design, the structure could easily accommodate collaborative features (e.g., shared partner dashboards) by adding membership maps to the relevant documents and denormalizing as needed.\n*   **Global Roles:** Admin status is managed via the `/roles_admin/{uid}` collection. Presence in this collection grants admin privileges.\n\n**QAPs (Rules are not Filters):**\n\n*   The segregation of data based on access needs enables secure `list` operations. For example, listing offers does not require filtering based on user roles or permissions, as the collection only contains publicly available offer data.\n*   Path-based ownership allows secure `list` operations for user-owned resources (redemptions and invite codes) within the `/users/{userId}/` subcollections."
+  }
+}
