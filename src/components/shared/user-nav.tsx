@@ -46,7 +46,7 @@ export function UserNav() {
   const getInitials = (name: string | null | undefined) => {
     if (!name) return '??';
     const names = name.split(' ');
-    if (names.length > 1) {
+    if (names.length > 1 && names[0] && names[names.length - 1]) {
       return names[0][0] + names[names.length - 1][0];
     }
     return name.substring(0, 2);
@@ -58,7 +58,7 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
             <AvatarImage src={user.photoURL || ''} alt={user.displayName || ''} />
-            <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+            <AvatarFallback>{getInitials(user.displayName || user.email)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
