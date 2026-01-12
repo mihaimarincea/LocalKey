@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
@@ -5,9 +6,32 @@ import {LoginForm} from '@/components/auth/login-form';
 import {SignupForm} from '@/components/auth/signup-form';
 import AppLogo from '@/components/shared/app-logo';
 import {PlaceHolderImages} from '@/lib/placeholder-images';
+import { useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AuthPage() {
   const bgImage = PlaceHolderImages.find(img => img.id === "auth-background");
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      // TODO: Add role based routing
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="text-center">
+          <AppLogo />
+          <p className="mt-4 text-muted-foreground">Se încarcă...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-screen lg:grid lg:grid-cols-2">

@@ -1,3 +1,4 @@
+'use client';
 import {
   Table,
   TableBody,
@@ -15,7 +16,6 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { mockOffers } from "@/lib/data"
 import { format } from "date-fns"
 import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
@@ -26,8 +26,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection } from "firebase/firestore"
+import type { Offer } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminOffersPage() {
+  const firestore = useFirestore();
+  const offersRef = useMemoFirebase(() => collection(firestore, "offers"), [firestore]);
+  const { data: offers, isLoading } = useCollection<Offer>(offersRef);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -58,7 +66,12 @@ export default function AdminOffersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockOffers.map(offer => (
+            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                <OfferTableRowSkeleton key={i} />
+            ))}
+            {offers?.map(offer => {
+              const expiresAtDate = offer.expiresAt instanceof Date ? offer.expiresAt : (offer.expiresAt as any).toDate();
+              return (
               <TableRow key={offer.id}>
                 <TableCell>
                   <Badge variant={offer.isPaused ? "secondary" : "default"}>
@@ -70,7 +83,7 @@ export default function AdminOffersPage() {
                   {offer.partnerName}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(offer.expiresAt, "PPP", { locale: ro })}
+                  {format(expiresAtDate, "PPP", { locale: ro })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -91,10 +104,20 @@ export default function AdminOffersPage() {
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </CardContent>
     </Card>
   )
 }
+
+const OfferTableRowSkeleton = () => (
+    <TableRow>
+        <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+        <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-32" /></TableCell>
+        <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+    </TableRow>
+)

@@ -1,3 +1,4 @@
+'use client';
 import Image from "next/image"
 import {
   Table,
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { mockUsers } from "@/lib/data"
 import { format } from "date-fns"
 import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
@@ -27,8 +27,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection } from "firebase/firestore"
+import type { User } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminUsersPage() {
+  const firestore = useFirestore();
+  const usersRef = useMemoFirebase(() => collection(firestore, "users"), [firestore]);
+  const { data: users, isLoading } = useCollection<User>(usersRef);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -52,7 +60,7 @@ export default function AdminUsersPage() {
               <TableHead className="hidden w-[100px] sm:table-cell">
                 <span className="sr-only">Imagine</span>
               </TableHead>
-              <TableHead>Nume</TableHead>
+              <TableHead>Nume/Email</TableHead>
               <TableHead>Rol</TableHead>
               <TableHead className="hidden md:table-cell">
                 Invitații
@@ -66,50 +74,79 @@ export default function AdminUsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockUsers.map(user => (
-              <TableRow key={user.id}>
-                <TableCell className="hidden sm:table-cell">
-                  <Image
-                    alt="Avatar utilizator"
-                    className="aspect-square rounded-full object-cover"
-                    height="64"
-                    src={user.avatarUrl}
-                    width="64"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{user.role}</Badge>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {user.inviteCodeCount}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {format(user.createdAt, "PPP", { locale: ro })}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Comută meniu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
-                      <DropdownMenuItem>Editează</DropdownMenuItem>
-                      <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Suspendă
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+              <UserTableRowSkeleton key={i} />
             ))}
+            {users?.map(user => {
+              const createdAtDate = user.createdAt instanceof Date ? user.createdAt : (user.createdAt as any).toDate();
+              return (
+                <TableRow key={user.id}>
+                  <TableCell className="hidden sm:table-cell">
+                    <Image
+                      alt="Avatar utilizator"
+                      className="aspect-square rounded-full object-cover"
+                      height="64"
+                      src={user.avatarUrl || `https://avatar.vercel.sh/${user.email}.png`}
+                      width="64"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{user.name || user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{user.role}</Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {user.inviteCodeCount || 0}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {format(createdAtDate, "PPP", { locale: ro })}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Comută meniu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
+                        <DropdownMenuItem>Editează</DropdownMenuItem>
+                        <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          Suspendă
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </CardContent>
     </Card>
   )
 }
+
+const UserTableRowSkeleton = () => (
+    <TableRow>
+        <TableCell className="hidden sm:table-cell">
+            <Skeleton className="h-16 w-16 rounded-full" />
+        </TableCell>
+        <TableCell>
+            <Skeleton className="h-4 w-32" />
+        </TableCell>
+        <TableCell>
+            <Skeleton className="h-6 w-16 rounded-full" />
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
+            <Skeleton className="h-4 w-8" />
+        </TableCell>
+        <TableCell className="hidden md:table-cell">
+            <Skeleton className="h-4 w-24" />
+        </TableCell>
+        <TableCell>
+            <Skeleton className="h-8 w-8" />
+        </TableCell>
+    </TableRow>
+)

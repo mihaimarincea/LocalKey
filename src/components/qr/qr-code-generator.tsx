@@ -7,22 +7,28 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck, ShieldOff, WifiOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { mockUsers } from "@/lib/data";
+import { useUser } from "@/firebase";
 
 const QR_VALIDITY_SECONDS = 60;
 
 export function QrCodeGenerator() {
+  const { user } = useUser();
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(QR_VALIDITY_SECONDS);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const generateQrCode = () => {
+    if (!user) {
+        setLoading(false);
+        toast({ title: "Utilizator neautentificat", description: "Vă rugăm să vă autentificați pentru a genera un cod QR.", variant: "destructive"});
+        return;
+    };
+
     setLoading(true);
     // In a real app, this data would be a secure, short-lived token from your backend
-    const currentUser = mockUsers.find(u => u.role === 'user');
     const qrData = JSON.stringify({
-      userId: currentUser?.id,
+      userId: user.uid,
       timestamp: new Date().toISOString(),
       // This should be a securely generated token
       token: `dk_tok_${Math.random().toString(36).substr(2, 16)}`, 
@@ -36,7 +42,8 @@ export function QrCodeGenerator() {
 
   useEffect(() => {
     generateQrCode();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     if (qrCodeUrl && timeLeft > 0) {

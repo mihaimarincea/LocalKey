@@ -21,6 +21,7 @@ interface OfferCardProps {
 }
 
 export function OfferCard({ offer }: OfferCardProps) {
+    const expiresAtDate = offer.expiresAt instanceof Date ? offer.expiresAt : (offer.expiresAt as any).toDate();
   return (
     <Card className="flex flex-col overflow-hidden h-full">
       <CardHeader className="p-0">
@@ -51,7 +52,7 @@ export function OfferCard({ offer }: OfferCardProps) {
         <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                <span>Expiră {formatDistanceToNow(offer.expiresAt, { addSuffix: true, locale: ro })}</span>
+                <span>Expiră {formatDistanceToNow(expiresAtDate, { addSuffix: true, locale: ro })}</span>
             </div>
             <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
                 <Link href="/dashboard/qr">Răscumpără</Link>

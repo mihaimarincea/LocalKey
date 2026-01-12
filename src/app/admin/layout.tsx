@@ -4,6 +4,10 @@ import { usePathname } from "next/navigation"
 import { MainLayout, MainLayoutHeader, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, AppLogo } from '@/components/shared/main-layout';
 import type { NavItem } from '@/types';
 import { LayoutDashboard, Users, Building, Gift, Mail, CreditCard, BarChart } from 'lucide-react';
+import { useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 
 const navItems: NavItem[] = [
     { href: '/admin/dashboard', title: 'Panou', icon: LayoutDashboard },
@@ -21,6 +25,24 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname()
+    const { user, isUserLoading } = useUser();
+    const router = useRouter();
+    
+    useEffect(() => {
+        if (!isUserLoading && !user) {
+            router.push('/');
+        }
+        // TODO: Add role check to redirect non-admin users
+    }, [user, isUserLoading, router]);
+
+    if (isUserLoading || !user) {
+        return (
+            <div className="flex h-screen w-full items-center justify-center">
+                <p>Se încarcă...</p>
+            </div>
+        );
+    }
+
     const userRole = "Admin"
 
     return (

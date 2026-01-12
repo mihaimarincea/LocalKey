@@ -1,3 +1,4 @@
+'use client';
 import {
   Table,
   TableBody,
@@ -14,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { mockPartners } from "@/lib/data"
 import { format } from "date-fns"
 import { ro } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
@@ -25,8 +25,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection } from "firebase/firestore"
+import type { Partner } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminPartnersPage() {
+  const firestore = useFirestore();
+  const partnersRef = useMemoFirebase(() => collection(firestore, "partners"), [firestore]);
+  const { data: partners, isLoading } = useCollection<Partner>(partnersRef);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -64,7 +72,12 @@ export default function AdminPartnersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockPartners.map(partner => (
+            {isLoading && Array.from({ length: 4 }).map((_, i) => (
+              <PartnerTableRowSkeleton key={i} />
+            ))}
+            {partners?.map(partner => {
+              const createdAtDate = partner.createdAt instanceof Date ? partner.createdAt : (partner.createdAt as any).toDate();
+              return (
               <TableRow key={partner.id}>
                 <TableCell className="font-medium">{partner.name}</TableCell>
                 <TableCell>{partner.email}</TableCell>
@@ -75,7 +88,7 @@ export default function AdminPartnersPage() {
                   {partner.totalRedemptions.toLocaleString()}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(partner.createdAt, "PPP", { locale: ro })}
+                  {format(createdAtDate, "PPP", { locale: ro })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -96,10 +109,21 @@ export default function AdminPartnersPage() {
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </CardContent>
     </Card>
   )
 }
+
+const PartnerTableRowSkeleton = () => (
+    <TableRow>
+        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+        <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-8" /></TableCell>
+        <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-12" /></TableCell>
+        <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+    </TableRow>
+)

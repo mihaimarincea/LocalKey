@@ -3,6 +3,9 @@ import { PlaceHolderImages } from './placeholder-images';
 
 const findImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.imageUrl || 'https://placehold.co/600x400';
 
+// Note: This data is now for seeding/testing purposes.
+// The app fetches live data from Firestore.
+
 export const mockOffers: Offer[] = [
   {
     id: 'offer-001',
@@ -17,71 +20,6 @@ export const mockOffers: Offer[] = [
     isPaused: false,
     location: { lat: 34.0522, lng: -118.2437 },
   },
-  {
-    id: 'offer-002',
-    title: '20% Reducere la orice carte cu copertă cartonată',
-    description: 'Explorează lumi noi cu 20% reducere la următoarea ta achiziție de carte cu copertă cartonată.',
-    partnerId: 'partner-002',
-    partnerName: 'The Book Nook',
-    partnerLogoUrl: findImage('partner-logo-2'),
-    imageUrl: findImage('offer-3'),
-    category: 'Cărți',
-    expiresAt: new Date(new Date().setDate(new Date().getDate() + 15)),
-    isPaused: false,
-    location: { lat: 34.055, lng: -118.25 },
-  },
-  {
-    id: 'offer-003',
-    title: 'O felie de pizza gratuită la una cumpărată',
-    description: 'Adu un prieten și bucurați-vă de o felie din partea casei. Valabil pentru orice felie de pizza.',
-    partnerId: 'partner-003',
-    partnerName: 'Pizza Palace',
-    partnerLogoUrl: findImage('partner-logo-3'),
-    imageUrl: findImage('offer-4'),
-    category: 'Restaurant',
-    expiresAt: new Date(new Date().setDate(new Date().getDate() + 7)),
-    isPaused: false,
-    location: { lat: 34.048, lng: -118.24 },
-  },
-  {
-    id: 'offer-004',
-    title: '15% Reducere la noile colecții',
-    description: 'Actualizează-ți garderoba cu 15% reducere la cea mai recentă colecție.',
-    partnerId: 'partner-004',
-    partnerName: 'Chic Boutique',
-    partnerLogoUrl: findImage('partner-logo-1'),
-    imageUrl: findImage('offer-5'),
-    category: 'Cumpărături',
-    expiresAt: new Date(new Date().setDate(new Date().getDate() + 25)),
-    isPaused: true,
-    location: { lat: 34.058, lng: -118.245 },
-  },
-  {
-    id: 'offer-005',
-    title: 'Prima ședință de yoga gratuită',
-    description: 'Începe-ți călătoria spre bunăstare. Prima ta ședință de yoga în grup este din partea casei.',
-    partnerId: 'partner-005',
-    partnerName: 'Zenith Yoga',
-    partnerLogoUrl: findImage('partner-logo-2'),
-    imageUrl: findImage('offer-6'),
-    category: 'Wellness',
-    expiresAt: new Date(new Date().setDate(new Date().getDate() + 60)),
-    isPaused: false,
-    location: { lat: 34.051, lng: -118.239 },
-  },
-  {
-    id: 'offer-006',
-    title: 'Pâine cu maia la 5 lei',
-    description: 'Ia pâinea noastră artizanală cu maia organică la doar 5 lei în această săptămână.',
-    partnerId: 'partner-006',
-    partnerName: 'Artisan Bakes',
-    partnerLogoUrl: findImage('partner-logo-3'),
-    imageUrl: findImage('offer-2'),
-    category: 'Brutărie',
-    expiresAt: new Date(new Date().setDate(new Date().getDate() + 5)),
-    isPaused: false,
-    location: { lat: 34.053, lng: -118.235 },
-  },
 ];
 
 export const mockUsers: User[] = [
@@ -94,42 +32,6 @@ export const mockUsers: User[] = [
     createdAt: new Date('2023-01-15T09:30:00Z'),
     inviteCodeCount: 3,
   },
-  {
-    id: 'user-002',
-    name: 'Maria Popescu',
-    email: 'maria@example.com',
-    avatarUrl: findImage('user-avatar-2'),
-    role: 'user',
-    createdAt: new Date('2023-02-20T14:00:00Z'),
-    inviteCodeCount: 1,
-  },
-  {
-    id: 'user-003',
-    name: 'Andrei Chen',
-    email: 'chen@example.com',
-    avatarUrl: 'https://placehold.co/100x100',
-    role: 'user',
-    createdAt: new Date('2023-03-10T11:45:00Z'),
-    inviteCodeCount: 3,
-  },
-    {
-    id: 'partner-user-001',
-    name: 'Ion Pop (Partener)',
-    email: 'john.doe@dailygrind.com',
-    avatarUrl: findImage('user-avatar-2'),
-    role: 'partner',
-    createdAt: new Date('2023-01-10T08:00:00Z'),
-    inviteCodeCount: 0,
-  },
-  {
-    id: 'admin-user-001',
-    name: 'Ioana Preda (Admin)',
-    email: 'jane.smith@localkey.com',
-    avatarUrl: findImage('user-avatar-1'),
-    role: 'admin',
-    createdAt: new Date('2023-01-01T00:00:00Z'),
-    inviteCodeCount: 99,
-  },
 ];
 
 export const mockPartners: Partner[] = [
@@ -141,30 +43,6 @@ export const mockPartners: Partner[] = [
     offerCount: 1,
     totalRedemptions: 120,
   },
-  {
-    id: 'partner-002',
-    name: 'The Book Nook',
-    email: 'info@booknook.com',
-    createdAt: new Date('2023-01-12T10:20:00Z'),
-    offerCount: 1,
-    totalRedemptions: 85,
-  },
-  {
-    id: 'partner-003',
-    name: 'Pizza Palace',
-    email: 'manager@pizzapalace.com',
-    createdAt: new Date('2023-02-01T18:00:00Z'),
-    offerCount: 1,
-    totalRedemptions: 250,
-  },
-   {
-    id: 'partner-004',
-    name: 'Chic Boutique',
-    email: 'support@chicboutique.com',
-    createdAt: new Date('2023-02-15T12:00:00Z'),
-    offerCount: 1,
-    totalRedemptions: 45,
-  },
 ];
 
 export const mockInvites: Invite[] = [
@@ -175,25 +53,6 @@ export const mockInvites: Invite[] = [
         usedBy: 'user-002',
         createdAt: new Date('2023-02-19T10:00:00Z'),
     },
-    {
-        code: 'KEY-A9D5E',
-        status: 'used',
-        invitedBy: 'user-001',
-        usedBy: 'user-003',
-        createdAt: new Date('2023-03-09T15:30:00Z'),
-    },
-    {
-        code: 'DEAL-G4H7J',
-        status: 'available',
-        invitedBy: 'user-001',
-        createdAt: new Date('2023-04-01T11:00:00Z'),
-    },
-    {
-        code: 'UNLOCK-K2L3M',
-        status: 'available',
-        invitedBy: 'user-002',
-        createdAt: new Date('2023-05-10T09:00:00Z'),
-    }
 ];
 
 export const mockRedemptions: Redemption[] = [
@@ -203,26 +62,5 @@ export const mockRedemptions: Redemption[] = [
         offerId: 'offer-001',
         partnerId: 'partner-001',
         redeemedAt: new Date(new Date().setDate(new Date().getDate() - 2)),
-    },
-    {
-        id: 'red-002',
-        userId: 'user-002',
-        offerId: 'offer-002',
-        partnerId: 'partner-002',
-        redeemedAt: new Date(new Date().setDate(new Date().getDate() - 5)),
-    },
-    {
-        id: 'red-003',
-        userId: 'user-001',
-        offerId: 'offer-003',
-        partnerId: 'partner-003',
-        redeemedAt: new Date(new Date().setDate(new Date().getDate() - 1)),
-    },
-    {
-        id: 'red-004',
-        userId: 'user-003',
-        offerId: 'offer-001',
-        partnerId: 'partner-001',
-        redeemedAt: new Date(new Date().setDate(new Date().getDate() - 10)),
     },
 ];
