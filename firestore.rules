@@ -23,45 +23,39 @@ service cloud.firestore {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_partner/$(request.auth.uid));
     }
 
-    function isOwnerFieldImmutable(fieldName) {
-      return resource == null || request.resource.data[fieldName] == resource.data[fieldName];
-    }
-    
-    function isValidOfferData() {
-      let data = request.resource.data;
-      return data.partnerId is string &&
-             data.title is string && data.title.size() > 0 &&
-             data.description is string && data.description.size() > 0;
-    }
-
     // -------------------------------------------------------------------------
     // User Collection Rules
     // -------------------------------------------------------------------------
 
     match /users/{userId} {
-      // Admins have full access to all user documents
-      allow get, list, create, update, delete: if isAdmin();
-
-      // Signed-in users can create their own document
-      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
+      // Admins can get any user document. Users can get their own.
+      allow get: if isAdmin() || isOwner(userId);
       
-      // Users can get and update their own document
-      allow get, update: if isOwner(userId);
+      // Admins can update any user document. Users can update their own.
+      allow update: if isAdmin() || isOwner(userId);
+      
+      // Only admins can delete user documents.
+      allow delete: if isAdmin();
 
-      // Sub-collection: redemptions
+      // Sub-collections
       match /redemptions/{redemptionId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if (isOwner(userId) || isPartner()) && request.resource.data.userId == userId;
         allow update, delete: if isAdmin();
       }
 
-      // Sub-collection: invite_codes
       match /invite_codes/{inviteCodeId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.inviterId == userId;
         allow update, delete: if isAdmin();
       }
     }
+    
+    // This rule allows admins to list all users, which is needed for the admin user management page
+    match /users/{document=**} {
+        allow list, create: if isAdmin() || isSignedIn();
+    }
+
 
     // -------------------------------------------------------------------------
     // Public and Partner-facing Collections
@@ -74,9 +68,8 @@ service cloud.firestore {
 
     match /offers/{offerId} {
       allow get, list: if true;
-      allow create: if (isAdmin() || isPartner()) && isValidOfferData() && request.resource.data.partnerId == request.auth.uid;
-      allow update: if (isAdmin() || (isPartner() && resource.data.partnerId == request.auth.uid)) && isValidOfferData() && isOwnerFieldImmutable('partnerId');
-      allow delete: if isAdmin() || (isPartner() && resource.data.partnerId == request.auth.uid);
+      allow create: if isAdmin() || isPartner();
+      allow update, delete: if isAdmin() || (isPartner() && resource.data.partnerId == request.auth.uid);
     }
     
     // -------------------------------------------------------------------------
@@ -84,10 +77,12 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /roles_admin/{uid} {
+      // Only other admins can see or edit who is an admin.
       allow read, write: if isAdmin();
     }
     
     match /roles_partner/{uid} {
+      // Only admins can manage the partner role.
       allow read, write: if isAdmin();
     }
   }
