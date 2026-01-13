@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { format } from "date-fns"
 import { ro, enUS } from "date-fns/locale"
-import { MoreHorizontal, PlusCircle, Pencil, Trash2 } from "lucide-react"
+import { PlusCircle, Pencil, Trash2 } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { useCollection, useFirestore, useUser, useMemoFirebase } from "@/firebase";
 import { collection, query, where, doc, updateDoc, deleteDoc } from "firebase/firestore";
@@ -27,6 +27,7 @@ import type { Offer } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { AddOfferDialog } from "@/components/partner/add-offer-dialog";
 
 
 export default function PartnerOffersPage() {
@@ -89,12 +90,14 @@ export default function PartnerOffersPage() {
             {t('partnerLayout.offers.subtitle')}
           </CardDescription>
         </div>
-        <Button size="sm" className="gap-1">
-          <PlusCircle className="h-3.5 w-3.5" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            {t('partnerLayout.offers.add')}
-          </span>
-        </Button>
+        <AddOfferDialog>
+          <Button size="sm" className="gap-1">
+            <PlusCircle className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+              {t('partnerLayout.offers.add')}
+            </span>
+          </Button>
+        </AddOfferDialog>
       </CardHeader>
       <CardContent>
       <TooltipProvider>
