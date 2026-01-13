@@ -19,8 +19,8 @@ export default function AdminUsersPage() {
   const firestore = useFirestore();
 
   // Queries for stats
-  const usersQuery = useMemoFirebase(() => query(collection(firestore, "users"), where("role", "==", "user")), [firestore]);
-  const partnersQuery = useMemoFirebase(() => query(collection(firestore, "users"), where("role", "==", "partner")), [firestore]);
+  const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, "users"), where("role", "==", "user")) : null, [firestore]);
+  const partnersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, "users"), where("role", "==", "partner")) : null, [firestore]);
 
   const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
   const { data: partners, isLoading: partnersLoading } = useCollection(partnersQuery);
