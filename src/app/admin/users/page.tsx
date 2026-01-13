@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { collection, query, where } from "firebase/firestore"
 import type { User } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useLanguage } from "@/contexts/language-context"
@@ -36,8 +36,12 @@ import { useLanguage } from "@/contexts/language-context"
 export default function AdminUsersPage() {
   const firestore = useFirestore();
   const { t, language } = useLanguage();
-  const usersRef = useMemoFirebase(() => collection(firestore, "users"), [firestore]);
-  const { data: users, isLoading } = useCollection<User>(usersRef);
+  
+  const usersQuery = useMemoFirebase(() => 
+    query(collection(firestore, "users"), where("role", "!=", "admin"))
+  , [firestore]);
+  
+  const { data: users, isLoading } = useCollection<User>(usersQuery);
   const locale = language === 'ro' ? ro : enUS;
 
   return (
