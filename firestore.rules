@@ -16,7 +16,7 @@
  *
  * @section Key Security Decisions
  * - Admin Role: A user is considered an admin if a document with their UID exists in the `/roles_admin` collection. Admins have broad read/write access for management.
- * - User Data Privacy: All data nested under `/users/{userId}` is considered private. Access is restricted to the document owner and administrators. Listing of top-level user profiles is disallowed to prevent user enumeration.
+ * - User Data Privacy: All data nested under `/users/{userId}` is considered private. Access is restricted to the document owner and administrators. Listing of top-level user profiles is now restricted to admins to prevent user enumeration.
  * - Public Data: The `/partners` and `/offers` collections are publicly readable by anyone, including unauthenticated users, to allow the app to display business information. All write operations on this data are restricted to admins.
  * - Immutable Ownership: Once a document is created with an ownership link (e.g., a `userId` or `inviterId` field), that link cannot be changed. This is enforced on update operations.
  *
@@ -75,13 +75,13 @@ service cloud.firestore {
     /**
      * @description Manages user profile documents.
      * @path /users/{userId}
-     * @allow A user (auth.uid='user123') creates their own profile document at `/users/user123`. (create)
+     * @allow An admin can list all users. (list)
      * @deny A user (auth.uid='user456') attempts to read another user's profile at `/users/user123`. (get, list)
-     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration by non-admins.
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
-      allow list: if false;
+      allow list: if isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if (isOwner(userId) || isAdmin()) && resource != null && request.resource.data.id == resource.data.id;
       allow delete: if isAdmin() && resource != null;
