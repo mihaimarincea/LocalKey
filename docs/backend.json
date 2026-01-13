@@ -4,103 +4,58 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
       "type": "object",
-      "description": "Represents a user of the LocalKey application.",
+      "description": "Represents a user of the LOCALKEY application.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user entity."
+          "description": "Unique identifier for the User entity."
         },
         "email": {
           "type": "string",
-          "description": "User's email address.",
+          "description": "Email address of the user.",
           "format": "email"
         },
         "phoneNumber": {
           "type": "string",
-          "description": "User's phone number."
+          "description": "Phone number of the user."
         },
-        "deviceId": {
-          "type": "string",
-          "description": "Device ID for fingerprinting."
-        },
-        "role": {
-          "type": "string",
-          "description": "User's role (e.g., user, partner, admin). This is for client-side logic and not used in security rules."
+        "inviteCodes": {
+          "type": "array",
+          "description": "List of invite codes associated with the user.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "id",
-        "email",
-        "role"
+        "email"
       ]
     },
     "Partner": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Partner",
       "type": "object",
-      "description": "Represents a partner location offering deals, awaiting approval.",
+      "description": "Represents a partner organization that provides offers.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the partner entity, matching the user ID."
+          "description": "Unique identifier for the Partner entity."
         },
-        "companyName": {
+        "name": {
           "type": "string",
-          "description": "The legal name of the company."
-        },
-        "cui": {
-          "type": "string",
-          "description": "Codul Unic de Înregistrare (CUI)."
-        },
-        "regCom": {
-          "type": "string",
-          "description": "Numărul de înregistrare la Registrul Comerțului."
-        },
-        "address": {
-          "type": "string",
-          "description": "The full address of the company headquarters."
-        },
-        "city": {
-          "type": "string",
-          "description": "The city of the company headquarters."
-        },
-        "county": {
-          "type": "string",
-          "description": "The county of the company headquarters."
-        },
-        "iban": {
-          "type": "string",
-          "description": "The company's bank account number (IBAN)."
-        },
-        "bank": {
-          "type": "string",
-          "description": "The name of the bank."
-        },
-        "contactName": {
-          "type": "string",
-          "description": "Name of the primary contact person."
+          "description": "Name of the partner organization."
         },
         "contactEmail": {
           "type": "string",
-          "description": "Contact email for the partner.",
+          "description": "Contact email address for the partner.",
           "format": "email"
-        },
-        "contactPhone": {
-          "type": "string",
-          "description": "Contact phone for the partner."
-        },
-        "status": {
-          "type": "string",
-          "description": "The approval status of the partner.",
-          "enum": ["pending", "approved", "rejected"]
         }
       },
       "required": [
         "id",
-        "companyName",
-        "cui",
-        "contactEmail",
-        "status"
+        "name",
+        "contactEmail"
       ]
     },
     "Offer": {
@@ -111,7 +66,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the offer entity."
+          "description": "Unique identifier for the Offer entity."
         },
         "partnerId": {
           "type": "string",
@@ -121,34 +76,26 @@
           "type": "string",
           "description": "Description of the offer."
         },
-        "validFrom": {
-          "type": "string",
-          "description": "Date and time when the offer becomes valid.",
-          "format": "date-time"
-        },
-        "validUntil": {
-          "type": "string",
-          "description": "Date and time when the offer expires.",
-          "format": "date-time"
+        "redemptionLimit": {
+          "type": "number",
+          "description": "Maximum number of times the offer can be redeemed."
         }
       },
       "required": [
         "id",
         "partnerId",
-        "description",
-        "validFrom",
-        "validUntil"
+        "description"
       ]
     },
     "Redemption": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Redemption",
       "type": "object",
-      "description": "Represents a user redeeming an offer at a partner location.",
+      "description": "Represents a user's redemption of an offer.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the redemption record."
+          "description": "Unique identifier for the Redemption entity."
         },
         "userId": {
           "type": "string",
@@ -158,13 +105,9 @@
           "type": "string",
           "description": "Reference to Offer. (Relationship: Offer 1:N Redemption)"
         },
-        "partnerId": {
+        "redemptionDate": {
           "type": "string",
-          "description": "Reference to Partner. (Relationship: Partner 1:N Redemption)"
-        },
-        "redemptionTime": {
-          "type": "string",
-          "description": "Date and time when the offer was redeemed.",
+          "description": "Date and time of the redemption.",
           "format": "date-time"
         }
       },
@@ -172,56 +115,89 @@
         "id",
         "userId",
         "offerId",
-        "partnerId",
-        "redemptionTime"
+        "redemptionDate"
       ]
     },
     "InviteCode": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "InviteCode",
       "type": "object",
-      "description": "Represents an invitation code for new users.",
+      "description": "Represents an invitation code.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the invite code document."
+          "description": "Unique identifier for the InviteCode entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N InviteCode) The user who created the invite code."
         },
         "code": {
           "type": "string",
-          "description": "The invite code string."
+          "description": "The invite code value."
         },
-        "status": {
-          "type": "string",
-          "description": "The status of the invite code.",
-          "enum": ["available", "used"]
-        },
-        "generatedBy": {
-          "type": "string",
-          "description": "ID of the user who generated the code."
-        },
-        "redeemedByUserId": {
-          "type": "string",
-          "description": "ID of the user who redeemed the code."
-        },
-        "redeemedAt": {
-          "type": "string",
-          "description": "Timestamp when the code was redeemed.",
-          "format": "date-time"
+        "redeemed": {
+          "type": "boolean",
+          "description": "Indicates whether the invite code has been redeemed."
         }
       },
       "required": [
         "id",
-        "code",
-        "status",
-        "generatedBy"
+        "userId",
+        "code"
+      ]
+    },
+    "DeviceFingerprint": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DeviceFingerprint",
+      "type": "object",
+      "description": "Represents a device fingerprint for anti-fraud measures.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DeviceFingerprint entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 DeviceFingerprint)"
+        },
+        "fingerprint": {
+          "type": "string",
+          "description": "The device fingerprint value."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "fingerprint"
+      ]
+    },
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Admin entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the admin.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "email"
       ]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "anonymous",
-      "google.com"
+      "anonymous"
     ]
   },
   "firestore": {
@@ -233,11 +209,11 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. Each document is keyed by the user's unique Firebase Auth ID.",
+          "description": "Stores user profiles. Path-based ownership for user data.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique Firebase Auth ID of the user."
+              "description": "The unique identifier of the user."
             }
           ]
         }
@@ -249,11 +225,11 @@
           "schema": {
             "$ref": "#/backend/entities/Partner"
           },
-          "description": "Stores partner profiles, including applications. Each document is keyed by a unique user ID which will be assigned the partner role upon approval.",
+          "description": "Stores partner information.",
           "params": [
             {
               "name": "partnerId",
-              "description": "The unique user ID for the partner."
+              "description": "The unique identifier of the partner."
             }
           ]
         }
@@ -265,27 +241,11 @@
           "schema": {
             "$ref": "#/backend/entities/Offer"
           },
-          "description": "Stores offer details. Includes the partnerId for retrieving offers by partner.",
+          "description": "Stores offer details. Includes 'partnerId' for authorization independence.",
           "params": [
             {
               "name": "offerId",
-              "description": "The unique identifier for the offer."
-            }
-          ]
-        }
-      },
-       {
-        "path": "/invite_codes/{inviteCodeId}",
-        "definition": {
-          "entityName": "InviteCode",
-          "schema": {
-            "$ref": "#/backend/entities/InviteCode"
-          },
-          "description": "Stores all invitation codes. Allows for efficient querying to validate codes upon user registration.",
-          "params": [
-            {
-              "name": "inviteCodeId",
-              "description": "The unique identifier for the invite code document."
+              "description": "The unique identifier of the offer."
             }
           ]
         }
@@ -297,44 +257,72 @@
           "schema": {
             "$ref": "#/backend/entities/Redemption"
           },
-          "description": "Stores redemption records for each user. Includes userId, offerId, and partnerId for authorization independence.",
+          "description": "Stores user redemptions. Path-based ownership. Includes denormalized 'offerId'.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique Firebase Auth ID of the user."
+              "description": "The unique identifier of the user."
             },
             {
               "name": "redemptionId",
-              "description": "The unique identifier for the redemption record."
+              "description": "The unique identifier of the redemption."
             }
           ]
         }
       },
       {
-        "path": "/roles_admin/{userId}",
+        "path": "/invite_codes/{inviteCodeId}",
         "definition": {
-          "description": "Marks a user as an administrator. The existence of a document with the user's ID in this collection grants admin privileges.",
+          "entityName": "InviteCode",
+          "schema": {
+            "$ref": "#/backend/entities/InviteCode"
+          },
+          "description": "Stores invite codes. Includes 'userId' of the creator.",
           "params": [
             {
-              "name": "userId",
-              "description": "The unique Firebase Auth ID of the administrator."
+              "name": "inviteCodeId",
+              "description": "The unique identifier of the invite code."
             }
           ]
         }
       },
       {
-        "path": "/roles_partner/{userId}",
+        "path": "/users/{userId}/device_fingerprint/{deviceFingerprintId}",
         "definition": {
-          "description": "Marks a user as a partner. The existence of a document with the user's ID in this collection grants partner privileges.",
+          "entityName": "DeviceFingerprint",
+          "schema": {
+            "$ref": "#/backend/entities/DeviceFingerprint"
+          },
+          "description": "Stores device fingerprints for fraud detection. Path-based ownership.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique Firebase Auth ID of the partner."
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "deviceFingerprintId",
+              "description": "The unique identifier of the device fingerprint."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{uid}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/Admin"
+          },
+          "description": "Indicates admin privileges. Existence over content.",
+          "params": [
+            {
+              "name": "uid",
+              "description": "The Firebase UID of the admin user."
             }
           ]
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the LocalKey application's core features, including user authentication, a separate partner application flow with manual approval, QR code generation for offer redemptions, usage tracking, and a mandatory invitation system for regular users, while prioritizing security and scalability. A top-level `partners` collection is used for applications, allowing admins to easily list and review them. A top-level `invite_codes` collection is used to allow for efficient global queries to validate invite codes during user registration."
+    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability, adhering to the specified principles. We leverage denormalization to avoid `get()` calls in security rules, ensuring atomic operations and simplifying debugging.\n\n*   **Users:** User data is stored under `/users/{userId}`, which provides path-based ownership for private user data.\n*   **Partners:** Partner data is stored in a flat `/partners/{partnerId}` collection.\n*   **Offers:** Offers are stored in `/offers/{offerId}`, with the `partnerId` denormalized within each offer document.  This allows listing offers without needing to filter based on partner-specific data.\n*   **Redemptions:** Redemptions are stored under `/users/{userId}/redemptions/{redemptionId}`, providing path-based ownership, aiding in usage tracking and fraud prevention. Each document also denormalizes the `offerId` for easy lookup. We could also create an aggregate collection of `redemptions_by_offer/{offerId}/redemptions/{redemptionId}` to facilitate queries across all redemptions for a given offer by partner, while maintaining a more granular level of ownership by user.\n*   **InviteCodes:** Invite codes are stored under `/invite_codes/{inviteCodeId}`. Each document includes the `userId` of the user who created the invite code. The separate collection allows easy querying and management of invite codes.\n*   **DeviceFingerprints:** Device fingerprints are stored under `/users/{userId}/device_fingerprint/{deviceFingerprintId}` to prevent fraud. The structure reflects the 1:1 relationship between users and device fingerprints.\n*   **Admins:** Admin UIDs are stored in `/roles_admin/{uid}` using the Existence over Content pattern.  The presence of a document at this path grants admin privileges, which is checked in security rules.\n\nThis structure facilitates QAPs by:\n\n*   Segregating data with different access needs (e.g., public vs. private data).\n*   Using path-based ownership for user-specific data (e.g., `/users/{userId}/redemptions/{redemptionId}`).\n*   Employing a membership map (existence over content) for global roles (admins in `/roles_admin/{uid}`)."
   }
 }

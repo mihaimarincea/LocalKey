@@ -1,99 +1,149 @@
+/**
+ * Core Philosophy: This ruleset enforces a security model with three primary tiers:
+ * 1. User-Owned Data: Most user-generated content is private and strictly controlled by the user who created it.
+ * 2. Publicly Readable Data: Core application data like offers and partners is readable by anyone, but writable only by administrators.
+ * 3. Administrative Roles: A specific collection (`/roles_admin`) grants global administrative privileges for managing the application's core data.
+ *
+ * Data Structure: The data is structured hierarchically to leverage path-based security. User-specific data (like redemptions and device fingerprints) is nested under a `/users/{userId}` path, creating a clear and secure ownership tree. Global data (like offers, partners, and invite codes) resides in top-level collections.
+ *
+ * Key Security Decisions:
+ * - Default Deny: All paths are closed by default. Access is granted on a per-collection basis.
+ * - No User Listing: It is not possible to list all documents in the `/users` collection to protect user privacy.
+ * - Admin Control: A user is considered an admin if a document with their UID exists in the `/roles_admin` collection. Admins have write access to public data like offers and partners.
+ * - Authorization Independence: Documents contain all necessary data for authorization decisions. For example, `invite_codes` documents contain a `userId` field, which avoids costly lookups to other documents and makes the rules fast and secure.
+ *
+ * Denormalization for Authorization: This ruleset relies on denormalization for efficient and secure access control.
+ * - `invite_codes`: Each document contains a `userId` field to establish ownership for write operations, allowing a simple `resource.data.userId == request.auth.uid` check.
+ *
+ * Structural Segregation: User data is strictly segregated. Private information like `redemptions` is stored in a user-specific subcollection (`/users/{userId}/redemptions`), which is more secure and performant than storing it in a single top-level collection with ownership fields.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -------------------------------------------------------------------------
-    // Helper Functions
-    // -------------------------------------------------------------------------
-
+    // Helper functions to abstract and simplify complex logic.
+    
+    /**
+     * Checks if the user is authenticated.
+     */
     function isSignedIn() {
       return request.auth != null;
     }
 
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    /**
+     * For update/delete operations, checks ownership AND ensures the document exists.
+     * This prevents unauthorized modifications on non-existent paths.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Checks if the requesting user has administrative privileges.
+     * An admin is defined by the existence of a document with their UID in the '/roles_admin' collection.
+     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
-    
-    function isPartner() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_partner/$(request.auth.uid));
-    }
 
-    // -------------------------------------------------------------------------
-    // User and Role Rules
-    // -------------------------------------------------------------------------
-
+    /**
+     * @description Controls access to user profile documents.
+     * @path /users/{userId}
+     * @allow A signed-in user (auth.uid: 'user123') can create their own profile at `/users/user123`.
+     * @deny An anonymous user cannot read any user profile. A signed-in user ('userABC') cannot delete another user's profile ('user123').
+     * @principle Restricts access to a user's own data tree and allows self-creation of a profile.
+     */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
-      // Allow creation if the user is signing up.
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
-
-      // Sub-collections for individual user access
-      match /redemptions/{redemptionId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      }
-    }
-    
-    match /users {
-      // Admins can list all users
-      allow list: if isAdmin();
+      allow list: if false; // Disallow listing of users to protect privacy.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId) || isAdmin();
     }
 
-    // Allows admins to query across all users' redemptions for the dashboard
-    match /{path=**}/redemptions/{redemptionId} {
-      allow read: if isAdmin();
-    }
-    
-    // -------------------------------------------------------------------------
-    // Public and Partner-facing Collections
-    // -------------------------------------------------------------------------
-
+    /**
+     * @description Controls access to partner organization data.
+     * @path /partners/{partnerId}
+     * @allow Any user, signed-in or not, can read partner information. An admin can create a new partner.
+     * @deny A regular signed-in user cannot create, update, or delete a partner document.
+     * @principle Enforces public read access for general information while restricting modifications to administrators.
+     */
     match /partners/{partnerId} {
-      // A user can create a partner application for themselves upon signup.
-      allow create: if isOwner(partnerId);
-      // Only admins or the partner themselves can read the partner document.
-      allow get: if isAdmin() || isOwner(partnerId);
-      // Only admins can update (approve/reject), delete, or list partner applications.
-      allow update, delete, list: if isAdmin();
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
 
+    /**
+     * @description Controls access to public offer details.
+     * @path /offers/{offerId}
+     * @allow Any user, signed-in or not, can read offer details. An admin can create a new offer.
+     * @deny A regular signed-in user cannot delete an offer.
+     * @principle Enforces public read access for offers while restricting modifications to administrators.
+     */
     match /offers/{offerId} {
-      allow read: if true;
-      allow create: if isAdmin() || isPartner();
-      allow update, delete: if isAdmin() || (isPartner() && resource.data.partnerId == request.auth.uid);
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
     }
 
-    // -------------------------------------------------------------------------
-    // Invite Code Rules
-    // -------------------------------------------------------------------------
+    /**
+     * @description Manages user-specific offer redemption records.
+     * @path /users/{userId}/redemptions/{redemptionId}
+     * @allow A user ('user123') can create and read their own redemption record under `/users/user123/redemptions/`.
+     * @deny A user ('userABC') cannot list or read redemptions for another user ('user123'). Updates are disallowed.
+     * @principle Enforces strict ownership of sensitive subcollection data using path-based security.
+     */
+    match /users/{userId}/redemptions/{redemptionId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if false; // Redemptions should be immutable once created.
+      allow delete: if isExistingOwner(userId) || isAdmin();
+    }
+
+    /**
+     * @description Controls access to invitation codes.
+     * @path /invite_codes/{inviteCodeId}
+     * @allow A signed-in user can create an invite code. Anyone can read an invite code to validate it.
+     * @deny An anonymous user cannot create an invite code. A user cannot delete an invite code created by someone else.
+     * @principle Implements Public Read with Owner-Only Writes. Ownership is checked via a 'userId' field in the document.
+     */
     match /invite_codes/{inviteCodeId} {
-      // Allow reading a code for validation before sign-up (e.g., check status).
-      allow get: if true; 
-      // Allow a signed-in user to update a code (to redeem it).
-      allow update: if isSignedIn();
-      // Only admins or authenticated users with invites left can create new ones.
-      allow create: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.inviteCodeCount > 0);
-      // Only admins can list or delete codes.
-      allow list, delete: if isAdmin();
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource != null && isOwner(resource.data.userId);
     }
-    
-    // -------------------------------------------------------------------------
-    // Role Management Rules
-    // -------------------------------------------------------------------------
 
-    match /roles_admin/{uid} {
-      allow read, write: if isAdmin();
+    /**
+     * @description Manages user-specific device fingerprints for fraud prevention.
+     * @path /users/{userId}/device_fingerprint/{deviceFingerprintId}
+     * @allow A user ('user123') can create their own device fingerprint under `/users/user123/device_fingerprint/`.
+     * @deny A user ('userABC') cannot read the device fingerprint of another user ('user123').
+     * @principle Enforces strict ownership of sensitive subcollection data using path-based security.
+     */
+    match /users/{userId}/device_fingerprint/{deviceFingerprintId} {
+      allow get, list: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId) || isAdmin();
     }
-    
-    match /roles_partner/{uid} {
-      allow read, write: if isAdmin();
+
+    /**
+     * @description Manages administrator roles. The existence of a document grants admin privileges.
+     * @path /roles_admin/{uid}
+     * @allow An existing admin can read the list of admins or add a new one.
+     * @deny A non-admin user cannot read, list, or write to this collection, preventing privilege escalation.
+     * @principle Secures access to role-granting documents, allowing only existing admins to manage roles.
+     */
+    match /roles_admin/{uid} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
   }
 }
