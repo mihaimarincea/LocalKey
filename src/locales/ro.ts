@@ -29,6 +29,8 @@ export const ro = {
       googleLoginErrorDescription: 'A apărut o problemă la autentificarea cu Google.',
       loginErrorTitle: 'Eroare de Autentificare',
       loginErrorDescription: 'A apărut o problemă la autentificare.',
+      errorTitle: 'A apărut o eroare',
+      errorDescription: 'Ceva nu a funcționat corect. Vă rugăm să încercați din nou.',
   
       signUpSuccessTitle: 'Cont Creat!',
       welcomeTo: 'Bun venit la LocalKey.',
@@ -238,7 +240,11 @@ export const ro = {
         toggleStatus: 'Comută starea ofertei',
         edit: 'Editează',
         viewStats: 'Vezi Statistici',
-        delete: 'Șterge'
+        delete: 'Șterge',
+        noOffers: 'Nu ai creat încă nicio ofertă.',
+        statusUpdated: 'Starea ofertei a fost actualizată!',
+        statusUpdatedSubtitle: 'Vizibilitatea ofertei a fost modificată.',
+        offerDeleted: 'Ofertă ștearsă'
       },
       scan: {
         title: 'Validează Răscumpărare',

@@ -29,6 +29,8 @@ export const en = {
       googleLoginErrorDescription: 'There was a problem signing in with Google.',
       loginErrorTitle: 'Login Error',
       loginErrorDescription: 'A problem occurred during login.',
+      errorTitle: 'An Error Occurred',
+      errorDescription: 'Something went wrong. Please try again.',
   
       signUpSuccessTitle: 'Account Created!',
       welcomeTo: 'Welcome to LocalKey.',
@@ -238,7 +240,11 @@ export const en = {
         toggleStatus: 'Toggle offer status',
         edit: 'Edit',
         viewStats: 'View Stats',
-        delete: 'Delete'
+        delete: 'Delete',
+        noOffers: 'You haven\'t created any offers yet.',
+        statusUpdated: 'Offer status updated!',
+        statusUpdatedSubtitle: 'The offer visibility has been changed.',
+        offerDeleted: 'Offer Deleted'
       },
       scan: {
         title: 'Validate Redemption',
