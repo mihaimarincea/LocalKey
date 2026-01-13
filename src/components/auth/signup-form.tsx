@@ -10,10 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, serverTimestamp, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
+import { useAuth, useFirestore } from '@/firebase';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User as FirebaseUser } from 'firebase/auth';
+import { doc, serverTimestamp, collection, query, where, getDocs, writeBatch, DocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { useLanguage } from '@/contexts/language-context';
+
+const ADMIN_EMAIL = "mihai.marincea@gmail.com";
 
 const GoogleIcon = () => (
     <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -38,7 +40,6 @@ const GoogleIcon = () => (
 
 export function SignupForm() {
   const [loading, setLoading] = useState(false);
-  const [inviteCode, setInviteCode] = useState('');
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
@@ -47,7 +48,10 @@ export function SignupForm() {
   const signupSchema = z.object({
     email: z.string().email({ message: t('validation.invalidEmail') }),
     password: z.string().min(8, { message: t('validation.passwordTooShort', { min: 8 }) }),
-    inviteCode: z.string().min(1, { message: "Invite code is required." }),
+    inviteCode: z.string(),
+  }).refine(data => data.email === ADMIN_EMAIL || data.inviteCode.length > 0, {
+      message: "Invite code is required for non-admin users.",
+      path: ["inviteCode"],
   });
 
   type SignupFormValues = z.infer<typeof signupSchema>;
@@ -55,13 +59,21 @@ export function SignupForm() {
   const {
     register,
     handleSubmit,
-    setValue,
+    watch,
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+        inviteCode: '',
+        email: ''
+    }
   });
 
-  const validateAndGetInviteDoc = async (code: string) => {
+  const emailValue = watch("email");
+  const inviteCodeValue = watch("inviteCode");
+
+  const validateAndGetInviteDoc = async (code: string): Promise<DocumentSnapshot<DocumentData> | null> => {
+    if (!code) return null;
     const invitesRef = collection(firestore, 'invite_codes');
     const q = query(invitesRef, where('code', '==', code), where('status', '==', 'available'));
     const querySnapshot = await getDocs(q);
@@ -77,8 +89,10 @@ export function SignupForm() {
     return querySnapshot.docs[0];
   };
 
-  const processRegistration = async (user: any, inviteDoc: any) => {
+  const processRegistration = async (user: FirebaseUser, inviteDoc: DocumentSnapshot<DocumentData> | null) => {
     const batch = writeBatch(firestore);
+    const isInitialAdmin = user.email === ADMIN_EMAIL;
+    const userRole = isInitialAdmin ? 'admin' : 'user';
 
     // 1. Create user document
     const userDocRef = doc(firestore, "users", user.uid);
@@ -87,20 +101,28 @@ export function SignupForm() {
         email: user.email,
         name: user.displayName || user.email?.split('@')[0] || 'New User',
         avatarUrl: user.photoURL || `https://avatar.vercel.sh/${user.email}.png`,
-        role: "user",
+        role: userRole,
         createdAt: serverTimestamp(),
-        inviteCodeCount: 3, // Initial invite codes for a new user
+        inviteCodeCount: isInitialAdmin ? 99 : 3, // Initial invite codes
     };
     batch.set(userDocRef, newUser);
 
-    // 2. Update invite code document
-    const inviteDocRef = doc(firestore, "invite_codes", inviteDoc.id);
-    batch.update(inviteDocRef, {
-        status: 'used',
-        redeemedByUserId: user.uid,
-        redeemedAt: serverTimestamp()
-    });
+    // Create role document for admin
+    if (isInitialAdmin) {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        batch.set(adminRoleRef, { role: 'admin' });
+    }
 
+    // 2. Update invite code document if it exists
+    if (inviteDoc) {
+        const inviteDocRef = doc(firestore, "invite_codes", inviteDoc.id);
+        batch.update(inviteDocRef, {
+            status: 'used',
+            redeemedByUserId: user.uid,
+            redeemedAt: serverTimestamp()
+        });
+    }
+    
     await batch.commit();
 
     toast({
@@ -110,24 +132,36 @@ export function SignupForm() {
   };
 
   const handleGoogleSignUp = async () => {
-    if (!inviteCode) {
-        toast({ variant: "destructive", title: "Invite code required" });
-        return;
-    }
     setLoading(true);
+    const isInitialAdmin = emailValue === ADMIN_EMAIL;
 
-    const inviteDoc = await validateAndGetInviteDoc(inviteCode);
-    if (!inviteDoc) {
-        setLoading(false);
-        return;
+    let inviteDoc = null;
+    if (!isInitialAdmin) {
+        if (!inviteCodeValue) {
+            toast({ variant: "destructive", title: "Invite code required" });
+            setLoading(false);
+            return;
+        }
+        inviteDoc = await validateAndGetInviteDoc(inviteCodeValue);
+        if (!inviteDoc) {
+            setLoading(false);
+            return;
+        }
     }
 
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
+      // Special check for Google Sign-Up: ensure the signed-in email matches the intended admin email if trying to bootstrap
+      if(isInitialAdmin && result.user.email !== ADMIN_EMAIL) {
+          throw new Error("The email used for Google Sign-In does not match the admin email.");
+      }
       await processRegistration(result.user, inviteDoc);
     } catch (error: any) {
       console.error("Google Sign Up Error:", error);
+      if (auth.currentUser) {
+          await auth.currentUser.delete(); // Clean up partially created user
+      }
       toast({
         variant: "destructive",
         title: t('toast.googleSignUpErrorTitle'),
@@ -138,14 +172,17 @@ export function SignupForm() {
     }
   };
 
-
   const onSubmit = async (data: SignupFormValues) => {
     setLoading(true);
-
-    const inviteDoc = await validateAndGetInviteDoc(data.inviteCode);
-    if (!inviteDoc) {
-        setLoading(false);
-        return;
+    const isInitialAdmin = data.email === ADMIN_EMAIL;
+    
+    let inviteDoc = null;
+    if (!isInitialAdmin) {
+        inviteDoc = await validateAndGetInviteDoc(data.inviteCode);
+        if (!inviteDoc) {
+            setLoading(false);
+            return;
+        }
     }
     
     try {
@@ -163,61 +200,63 @@ export function SignupForm() {
     }
   };
 
+  const isSubmitDisabled = loading || (emailValue !== ADMIN_EMAIL && !inviteCodeValue);
+
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-2">
-        <Label htmlFor="inviteCode">Invite Code</Label>
-        <Input
-            id="inviteCode"
-            placeholder="LOCAL-XXXXX"
-            {...register('inviteCode')}
-            onChange={(e) => {
-                setInviteCode(e.target.value);
-                setValue('inviteCode', e.target.value);
-            }}
-            disabled={loading}
-        />
-        {errors.inviteCode && <p className="text-xs text-destructive">{errors.inviteCode.message}</p>}
-      </div>
-
-       <Button variant="outline" className="w-full" onClick={handleGoogleSignUp} disabled={loading || !inviteCode}>
-        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
-        {t('authPage.continueWithGoogle')}
-      </Button>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            {t('authPage.orContinueWith')}
-          </span>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="email">{t('email')}</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="m@example.com"
-            {...register('email')}
-            disabled={loading}
-          />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+            <Label htmlFor="email">{t('email')}</Label>
+            <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                {...register('email')}
+                disabled={loading}
+            />
+            {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
+
+        {emailValue !== ADMIN_EMAIL && (
+            <div className="grid gap-2">
+                <Label htmlFor="inviteCode">Invite Code</Label>
+                <Input
+                    id="inviteCode"
+                    placeholder="LOCAL-XXXXX"
+                    {...register('inviteCode')}
+                    disabled={loading}
+                />
+                {errors.inviteCode && <p className="text-xs text-destructive">{errors.inviteCode.message}</p>}
+            </div>
+        )}
+
         <div className="grid gap-2">
-          <Label htmlFor="password">{t('password')}</Label>
-          <Input id="password" type="password" {...register('password')} disabled={loading} />
-          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+            <Label htmlFor="password">{t('password')}</Label>
+            <Input id="password" type="password" {...register('password')} disabled={loading} />
+            {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
-        <Button type="submit" className="w-full" disabled={loading || !inviteCode}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {t('authPage.createAccount')}
+
+        <div className="grid gap-2">
+             <Button type="submit" className="w-full" disabled={isSubmitDisabled}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('authPage.createAccount')}
+            </Button>
+        </div>
+        
+        <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+                {t('authPage.orContinueWith')}
+            </span>
+            </div>
+        </div>
+
+        <Button variant="outline" type="button" className="w-full" onClick={handleGoogleSignUp} disabled={isSubmitDisabled}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
+            {t('authPage.continueWithGoogle')}
         </Button>
-      </form>
-    </div>
+    </form>
   );
 }
