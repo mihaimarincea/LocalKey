@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { MainLayout, MainLayoutHeader, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, AppLogo } from '@/components/shared/main-layout';
 import type { NavItem } from '@/types';
-import { LayoutDashboard, Users, Building, Gift, Mail, CreditCard, BarChart } from 'lucide-react';
+import { LayoutDashboard, Users, Building, Gift, Mail, CreditCard, BarChart, Database } from 'lucide-react';
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -31,6 +31,7 @@ export default function AdminLayout({
         { href: '/admin/invites', title: t('adminLayout.nav.invites'), icon: Mail },
         { href: '/admin/payments', title: t('adminLayout.nav.payments'), icon: CreditCard },
         { href: '/admin/reports', title: t('adminLayout.nav.reports'), icon: BarChart },
+        { href: '/admin/seed', title: "Seed Data", icon: Database },
     ];
 
     const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
