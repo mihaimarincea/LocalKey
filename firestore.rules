@@ -24,7 +24,6 @@ service cloud.firestore {
     }
 
     function isOwnerFieldImmutable(fieldName) {
-      // Allows field to not exist on resource for create operations
       return resource == null || request.resource.data[fieldName] == resource.data[fieldName];
     }
     
@@ -39,32 +38,28 @@ service cloud.firestore {
     // User Collection Rules
     // -------------------------------------------------------------------------
 
-    // Rules for the entire /users collection (list, create)
-    match /users {
-      allow list: if isAdmin();
-      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
-    }
-
-    // Rules for individual user documents (get, update, delete)
     match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow update: if (isOwner(userId) || isAdmin()) && isOwnerFieldImmutable('id');
-      allow delete: if isAdmin();
+      // Admins have full access to all user documents
+      allow get, list, create, update, delete: if isAdmin();
+
+      // Signed-in users can create their own document
+      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
+      
+      // Users can get and update their own document
+      allow get, update: if isOwner(userId);
 
       // Sub-collection: redemptions
       match /redemptions/{redemptionId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if (isOwner(userId) || isPartner()) && request.resource.data.userId == userId;
-        allow update: if isAdmin() && isOwnerFieldImmutable('userId');
-        allow delete: if isAdmin();
+        allow update, delete: if isAdmin();
       }
 
       // Sub-collection: invite_codes
       match /invite_codes/{inviteCodeId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.inviterId == userId;
-        allow update: if (isOwner(userId) || isAdmin()) && isOwnerFieldImmutable('inviterId');
-        allow delete: if isAdmin();
+        allow update, delete: if isAdmin();
       }
     }
 
