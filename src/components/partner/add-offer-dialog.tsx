@@ -32,7 +32,7 @@ const offerSchema = z.object({
   description: z.string().min(10, 'Descrierea trebuie să aibă cel puțin 10 caractere'),
   category: z.string().min(3, 'Categoria este obligatorie'),
   expiresAt: z.string().min(1, 'Data de expirare este obligatorie.'),
-  image: z.any().optional(), // Image is optional for draft
+  image: z.any().refine((files) => files?.length > 0, 'Imaginea este obligatorie.'),
 });
 
 type OfferFormValues = z.infer<typeof offerSchema>;
