@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Adresă de email invalidă." }),
@@ -58,6 +58,34 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
+  // Function to check and update user profile for invite codes
+  const ensureInviteCodes = async (userId: string, isNewUser: boolean = false, extraData: any = {}) => {
+    const userDocRef = doc(firestore, "users", userId);
+    try {
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            // If the field is missing for an existing user, add it.
+            if (typeof userData.inviteCodeCount === 'undefined') {
+                setDocumentNonBlocking(userDocRef, { inviteCodeCount: 3 }, { merge: true });
+            }
+        } else if (isNewUser) {
+            // For brand new users (e.g., first Google sign-in)
+            const newUser = {
+                id: userId,
+                role: "user",
+                createdAt: new Date(),
+                inviteCodeCount: 3,
+                ...extraData,
+            };
+            setDocumentNonBlocking(userDocRef, newUser, { merge: true });
+        }
+    } catch (error) {
+        console.error("Error ensuring invite codes:", error);
+    }
+  };
+
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
@@ -65,18 +93,13 @@ export function LoginForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      const userDocRef = doc(firestore, "users", user.uid);
-      const newUser = {
-        id: user.uid,
+      const extraData = {
         email: user.email,
         name: user.displayName,
         avatarUrl: user.photoURL,
-        role: "user",
-        createdAt: new Date(),
-        inviteCodeCount: 3,
       };
-
-      setDocumentNonBlocking(userDocRef, newUser, { merge: true });
+      
+      await ensureInviteCodes(user.uid, true, extraData);
 
       toast({
         title: "Autentificare Reușită",
@@ -97,7 +120,11 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      // Check and add invite codes for existing user if needed
+      await ensureInviteCodes(userCredential.user.uid);
+
       toast({
         title: "Autentificare Reușită",
         description: "Bun venit înapoi!",
