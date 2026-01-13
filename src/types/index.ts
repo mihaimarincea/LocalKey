@@ -1,20 +1,22 @@
+import { Timestamp } from "firebase/firestore";
+
 export type UserRole = 'user' | 'partner' | 'admin';
 
 export interface User {
   id: string;
-  name: string;
-  email: string;
-  avatarUrl: string;
+  name?: string;
+  email?: string;
+  avatarUrl?: string;
   role: UserRole;
-  createdAt: Date;
-  inviteCodeCount: number;
+  createdAt: Date | Timestamp;
+  inviteCodeCount?: number;
 }
 
 export interface Partner {
   id: string;
   name: string;
   email: string;
-  createdAt: Date;
+  createdAt: Date | Timestamp;
   offerCount: number;
   totalRedemptions: number;
 }
@@ -28,7 +30,7 @@ export interface Offer {
   partnerLogoUrl: string;
   imageUrl: string;
   category: string;
-  expiresAt: Date;
+  expiresAt: Date | Timestamp;
   isPaused: boolean;
   location: {
     lat: number;
@@ -41,7 +43,7 @@ export interface Invite {
     status: 'available' | 'used';
     invitedBy: string;
     usedBy?: string;
-    createdAt: Date;
+    createdAt: Date | Timestamp;
 }
 
 export interface Redemption {
@@ -49,7 +51,7 @@ export interface Redemption {
     userId: string;
     offerId: string;
     partnerId: string;
-    redeemedAt: Date;
+    redeemedAt: Date | Timestamp;
 }
 
 export type NavItem = {

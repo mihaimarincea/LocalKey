@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,14 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-
-const loginSchema = z.object({
-  email: z.string().email({ message: "Adresă de email invalidă." }),
-  password: z.string().min(6, { message: "Parola trebuie să aibă cel puțin 6 caractere." }),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { useLanguage } from '@/contexts/language-context';
 
 const GoogleIcon = () => (
     <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -49,7 +42,15 @@ export function LoginForm() {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+  const { t } = useLanguage();
 
+  const loginSchema = z.object({
+    email: z.string().email({ message: t('validation.invalidEmail') }),
+    password: z.string().min(6, { message: t('validation.passwordTooShort', { min: 6 }) }),
+  });
+  
+  type LoginFormValues = z.infer<typeof loginSchema>;
+  
   const {
     register,
     handleSubmit,
@@ -58,33 +59,20 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  // Function to check and update user profile for invite codes
-  const ensureInviteCodes = async (userId: string, isNewUser: boolean = false, extraData: any = {}) => {
+  const ensureInviteCodes = async (userId: string) => {
     const userDocRef = doc(firestore, "users", userId);
     try {
         const docSnap = await getDoc(userDocRef);
         if (docSnap.exists()) {
             const userData = docSnap.data();
-            // If the field is missing for an existing user, add it.
             if (typeof userData.inviteCodeCount === 'undefined') {
                 setDocumentNonBlocking(userDocRef, { inviteCodeCount: 3 }, { merge: true });
             }
-        } else if (isNewUser) {
-            // For brand new users (e.g., first Google sign-in)
-            const newUser = {
-                id: userId,
-                role: "user",
-                createdAt: new Date(),
-                inviteCodeCount: 3,
-                ...extraData,
-            };
-            setDocumentNonBlocking(userDocRef, newUser, { merge: true });
         }
     } catch (error) {
         console.error("Error ensuring invite codes:", error);
     }
   };
-
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -93,24 +81,34 @@ export function LoginForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      const extraData = {
-        email: user.email,
-        name: user.displayName,
-        avatarUrl: user.photoURL,
-      };
-      
-      await ensureInviteCodes(user.uid, true, extraData);
+      const userDocRef = doc(firestore, "users", user.uid);
+      const docSnap = await getDoc(userDocRef);
+
+      if (!docSnap.exists()) {
+        const newUser = {
+            id: user.uid,
+            email: user.email,
+            name: user.displayName,
+            avatarUrl: user.photoURL,
+            role: "user",
+            createdAt: serverTimestamp(),
+            inviteCodeCount: 3,
+        };
+        setDocumentNonBlocking(userDocRef, newUser, { merge: true });
+      } else {
+        await ensureInviteCodes(user.uid);
+      }
 
       toast({
-        title: "Autentificare Reușită",
-        description: "Bun venit înapoi!",
+        title: t('toast.loginSuccessTitle'),
+        description: t('toast.welcomeBack'),
       });
     } catch (error: any) {
       console.error("Google Sign In Error:", error);
       toast({
         variant: "destructive",
-        title: "Eroare de Autentificare Google",
-        description: error.message || "A apărut o problemă la autentificarea cu Google.",
+        title: t('toast.googleLoginErrorTitle'),
+        description: error.message || t('toast.googleLoginErrorDescription'),
       });
     } finally {
       setLoading(false);
@@ -121,21 +119,18 @@ export function LoginForm() {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      
-      // Check and add invite codes for existing user if needed
       await ensureInviteCodes(userCredential.user.uid);
 
       toast({
-        title: "Autentificare Reușită",
-        description: "Bun venit înapoi!",
+        title: t('toast.loginSuccessTitle'),
+        description: t('toast.welcomeBack'),
       });
-      // Role-based routing is handled in the page.tsx now
     } catch (error: any) {
       console.error("Login Error:", error);
       toast({
         variant: "destructive",
-        title: "Eroare de Autentificare",
-        description: error.message || "A apărut o problemă la autentificare.",
+        title: t('toast.loginErrorTitle'),
+        description: error.message || t('toast.loginErrorDescription'),
       });
     } finally {
       setLoading(false);
@@ -146,7 +141,7 @@ export function LoginForm() {
     <div className="grid gap-4">
       <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
-        Continuă cu Google
+        {t('authPage.continueWithGoogle')}
       </Button>
 
       <div className="relative">
@@ -155,18 +150,18 @@ export function LoginForm() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Sau continuă cu
+            {t('authPage.orContinueWith')}
           </span>
         </div>
       </div>
       
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="m@exemplu.com"
+            placeholder="m@example.com"
             {...register('email')}
             disabled={loading}
           />
@@ -174,9 +169,9 @@ export function LoginForm() {
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password">Parolă</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Link href="#" className="ml-auto inline-block text-sm underline">
-              Ai uitat parola?
+              {t('authPage.forgotPassword')}
             </Link>
           </div>
           <Input id="password" type="password" {...register('password')} disabled={loading} />
@@ -184,7 +179,7 @@ export function LoginForm() {
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Autentificare
+          {t('login')}
         </Button>
       </form>
     </div>

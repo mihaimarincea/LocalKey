@@ -12,12 +12,14 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import type { User } from '@/types';
 import { doc } from 'firebase/firestore';
+import { useLanguage, LanguageSelector } from '@/contexts/language-context';
 
 export default function AuthPage() {
   const bgImage = PlaceHolderImages.find(img => img.id === "auth-background");
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+  const { t } = useLanguage();
 
   const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
@@ -43,7 +45,7 @@ export default function AuthPage() {
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-center">
           <AppLogo />
-          <p className="mt-4 text-muted-foreground">Se încarcă...</p>
+          <p className="mt-4 text-muted-foreground">{t('loading')}...</p>
         </div>
       </div>
     );
@@ -55,22 +57,22 @@ export default function AuthPage() {
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <AppLogo />
-            <h1 className="text-3xl font-bold">Bun venit</h1>
+            <h1 className="text-3xl font-bold">{t('welcome')}</h1>
             <p className="text-balance text-muted-foreground">
-              Autentifică-te sau creează un cont pentru a debloca oferte locale
+              {t('authPage.subtitle')}
             </p>
           </div>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Autentificare</TabsTrigger>
-              <TabsTrigger value="signup">Înregistrare</TabsTrigger>
+              <TabsTrigger value="login">{t('login')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('signUp')}</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <Card className="bg-transparent border-none shadow-none">
                 <CardHeader>
-                  <CardTitle>Autentificare</CardTitle>
+                  <CardTitle>{t('login')}</CardTitle>
                   <CardDescription>
-                    Introdu datele tale pentru a accesa contul.
+                    {t('authPage.loginDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -81,9 +83,9 @@ export default function AuthPage() {
             <TabsContent value="signup">
               <Card className="bg-transparent border-none shadow-none">
                 <CardHeader>
-                  <CardTitle>Înregistrare</CardTitle>
+                  <CardTitle>{t('signUp')}</CardTitle>
                   <CardDescription>
-                    Introdu datele tale pentru a crea un cont.
+                    {t('authPage.signUpDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -93,8 +95,12 @@ export default function AuthPage() {
             </TabsContent>
           </Tabs>
 
+          <div className="flex justify-center">
+            <LanguageSelector />
+          </div>
+
           <div className="mt-4 text-center text-sm">
-            &copy; {new Date().getFullYear()} LOCALKEY. Toate drepturile rezervate.
+            &copy; {new Date().getFullYear()} LOCALKEY. {t('allRightsReserved')}.
           </div>
         </div>
       </div>

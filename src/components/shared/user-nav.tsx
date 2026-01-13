@@ -20,11 +20,13 @@ import { CreditCard, LogOut, Settings, User as UserIcon } from "lucide-react"
 import Link from "next/link"
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/language-context";
 
 export function UserNav() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -38,7 +40,7 @@ export function UserNav() {
   if (!user) {
     return (
       <Button asChild>
-        <Link href="/">Autentificare</Link>
+        <Link href="/">{t('userNav.login')}</Link>
       </Button>
     );
   }
@@ -65,7 +67,7 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'Utilizator'}</p>
+            <p className="text-sm font-medium leading-none">{user.displayName || t('userNav.user')}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -73,23 +75,27 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Profil</span>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings">
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>{t('userNav.profile')}</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard className="mr-2 h-4 w-4" />
-            <span>Facturare</span>
+            <span>{t('userNav.billing')}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Setări</span>
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>{t('userNav.settings')}</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Deconectare</span>
+            <span>{t('userNav.logout')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

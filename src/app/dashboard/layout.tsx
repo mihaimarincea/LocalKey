@@ -4,18 +4,13 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { MainLayout, MainLayoutHeader, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset, AppLogo } from '@/components/shared/main-layout';
 import type { NavItem } from '@/types';
-import { LayoutDashboard, QrCode, Mail } from 'lucide-react';
+import { LayoutDashboard, QrCode, Mail, Settings } from 'lucide-react';
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { User } from "@/types";
 import { doc } from 'firebase/firestore';
-
-const navItems: NavItem[] = [
-    { href: '/dashboard', title: 'Panou', icon: LayoutDashboard },
-    { href: '/dashboard/qr', title: 'Obține Cod QR', icon: QrCode },
-    { href: '/dashboard/invites', title: 'Invitații', icon: Mail },
-];
+import { useLanguage } from "@/contexts/language-context";
 
 export default function DashboardLayout({
     children,
@@ -26,6 +21,14 @@ export default function DashboardLayout({
     const { user, isUserLoading } = useUser();
     const router = useRouter();
     const firestore = useFirestore();
+    const { t } = useLanguage();
+
+    const navItems: NavItem[] = [
+        { href: '/dashboard', title: t('dashboardUser.nav.dashboard'), icon: LayoutDashboard },
+        { href: '/dashboard/qr', title: t('dashboardUser.nav.getQrCode'), icon: QrCode },
+        { href: '/dashboard/invites', title: t('dashboardUser.nav.invites'), icon: Mail },
+        { href: '/dashboard/settings', title: t('dashboardUser.nav.settings'), icon: Settings },
+    ];
 
     const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
     const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
@@ -34,7 +37,6 @@ export default function DashboardLayout({
         if (!isUserLoading && !user) {
             router.push('/');
         } else if (userProfile && userProfile.role !== 'user') {
-            // Redirect non-user roles away from user dashboard
             router.push('/');
         }
     }, [user, userProfile, isUserLoading, router]);
@@ -42,7 +44,7 @@ export default function DashboardLayout({
     if (isUserLoading || isProfileLoading || !userProfile) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
-                <p>Se încarcă...</p>
+                <p>{t('loading')}...</p>
             </div>
         );
     }
@@ -75,7 +77,7 @@ export default function DashboardLayout({
                 </SidebarContent>
                 <SidebarFooter>
                     <div className="text-xs text-muted-foreground p-2 text-center group-data-[collapsible=icon]:hidden">
-                        <p>Autentificat ca {userRole}</p>
+                        <p>{t('adminLayout.loggedInAs', { role: userRole })}</p>
                     </div>
                 </SidebarFooter>
             </Sidebar>

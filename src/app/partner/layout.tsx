@@ -10,12 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { User } from "@/types";
 import { doc } from 'firebase/firestore';
-
-const navItems: NavItem[] = [
-    { href: '/partner/dashboard', title: 'Panou', icon: LayoutDashboard },
-    { href: '/partner/scan', title: 'Scanează Cod QR', icon: ScanLine },
-    { href: '/partner/offers', title: 'Gestionează Oferte', icon: List },
-];
+import { useLanguage } from "@/contexts/language-context";
 
 export default function PartnerLayout({
     children,
@@ -26,6 +21,13 @@ export default function PartnerLayout({
     const { user, isUserLoading } = useUser();
     const router = useRouter();
     const firestore = useFirestore();
+    const { t } = useLanguage();
+
+    const navItems: NavItem[] = [
+        { href: '/partner/dashboard', title: t('partnerLayout.nav.dashboard'), icon: LayoutDashboard },
+        { href: '/partner/scan', title: t('partnerLayout.nav.scanQrCode'), icon: ScanLine },
+        { href: '/partner/offers', title: t('partnerLayout.nav.manageOffers'), icon: List },
+    ];
 
     const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
     const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
@@ -41,7 +43,7 @@ export default function PartnerLayout({
     if (isUserLoading || isProfileLoading || !userProfile) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
-                <p>Se încarcă...</p>
+                <p>{t('loading')}...</p>
             </div>
         );
     }
@@ -74,7 +76,7 @@ export default function PartnerLayout({
                 </SidebarContent>
                 <SidebarFooter>
                     <div className="text-xs text-muted-foreground p-2 text-center group-data-[collapsible=icon]:hidden">
-                        <p>Autentificat ca {userRole}</p>
+                        <p>{t('partnerLayout.loggedInAs', { role: userRole })}</p>
                     </div>
                 </SidebarFooter>
             </Sidebar>

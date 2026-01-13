@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,14 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
-
-const signupSchema = z.object({
-  email: z.string().email({ message: "Adresă de email invalidă." }),
-  password: z.string().min(8, { message: "Parola trebuie să aibă cel puțin 8 caractere." }),
-});
-
-type SignupFormValues = z.infer<typeof signupSchema>;
+import { doc, serverTimestamp } from 'firebase/firestore';
+import { useLanguage } from '@/contexts/language-context';
 
 const GoogleIcon = () => (
     <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -48,6 +41,14 @@ export function SignupForm() {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+  const { t } = useLanguage();
+
+  const signupSchema = z.object({
+    email: z.string().email({ message: t('validation.invalidEmail') }),
+    password: z.string().min(8, { message: t('validation.passwordTooShort', { min: 8 }) }),
+  });
+
+  type SignupFormValues = z.infer<typeof signupSchema>;
 
   const {
     register,
@@ -71,24 +72,22 @@ export function SignupForm() {
         name: user.displayName,
         avatarUrl: user.photoURL,
         role: "user",
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
         inviteCodeCount: 3,
       };
 
-      // Create user profile in Firestore, merging in case they already exist via another method.
       setDocumentNonBlocking(userDocRef, newUser, { merge: true });
 
       toast({
-        title: "Cont Creat!",
-        description: "Bun venit la LOCALKEY.",
+        title: t('toast.signUpSuccessTitle'),
+        description: t('toast.welcomeTo', { appName: 'LOCALKEY' }),
       });
-      // Role-based routing is handled in page.tsx
     } catch (error: any) {
       console.error("Google Sign Up Error:", error);
       toast({
         variant: "destructive",
-        title: "Eroare la Înregistrare cu Google",
-        description: error.message || "Nu s-a putut crea contul. Încercați din nou.",
+        title: t('toast.googleSignUpErrorTitle'),
+        description: error.message || t('toast.googleSignUpErrorDescription'),
       });
     } finally {
       setLoading(false);
@@ -106,27 +105,25 @@ export function SignupForm() {
       const newUser = {
         id: user.uid,
         email: user.email,
-        name: user.displayName || user.email?.split('@')[0] || 'Utilizator nou',
+        name: user.displayName || user.email?.split('@')[0] || 'New User',
         avatarUrl: user.photoURL || `https://avatar.vercel.sh/${user.email}.png`,
-        role: "user", // default role
-        createdAt: new Date(),
+        role: "user",
+        createdAt: serverTimestamp(),
         inviteCodeCount: 3,
       };
       
-      // Create user profile in Firestore
       setDocumentNonBlocking(userDocRef, newUser, { merge: true });
       
       toast({
-        title: "Cont Creat!",
-        description: "Bun venit la LOCALKEY.",
+        title: t('toast.signUpSuccessTitle'),
+        description: t('toast.welcomeTo', { appName: 'LOCALKEY' }),
       });
-      // Role-based routing is handled in page.tsx
     } catch (error: any) {
        console.error("Signup Error:", error);
       toast({
         variant: "destructive",
-        title: "Eroare la Înregistrare",
-        description: error.message || "Nu s-a putut crea contul. Încercați din nou.",
+        title: t('toast.signUpErrorTitle'),
+        description: error.message || t('toast.signUpErrorDescription'),
       });
     } finally {
       setLoading(false);
@@ -137,7 +134,7 @@ export function SignupForm() {
     <div className="grid gap-4">
        <Button variant="outline" className="w-full" onClick={handleGoogleSignUp} disabled={loading}>
         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
-        Continuă cu Google
+        {t('authPage.continueWithGoogle')}
       </Button>
 
       <div className="relative">
@@ -146,31 +143,31 @@ export function SignupForm() {
         </div>
         <div className="relative flex justify-center text-xs uppercase">
           <span className="bg-background px-2 text-muted-foreground">
-            Sau continuă cu
+            {t('authPage.orContinueWith')}
           </span>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="m@exemplu.com"
+            placeholder="m@example.com"
             {...register('email')}
             disabled={loading}
           />
           {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="password">Parolă</Label>
+          <Label htmlFor="password">{t('password')}</Label>
           <Input id="password" type="password" {...register('password')} disabled={loading} />
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Creează cont
+          {t('authPage.createAccount')}
         </Button>
       </form>
     </div>

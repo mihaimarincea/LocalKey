@@ -10,16 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { User } from "@/types";
 import { doc } from 'firebase/firestore';
-
-const navItems: NavItem[] = [
-    { href: '/admin/dashboard', title: 'Panou', icon: LayoutDashboard },
-    { href: '/admin/users', title: 'Utilizatori', icon: Users },
-    { href: '/admin/partners', title: 'Parteneri', icon: Building },
-    { href: '/admin/offers', title: 'Oferte', icon: Gift },
-    { href: '/admin/invites', title: 'Invitații', icon: Mail },
-    { href: '/admin/payments', title: 'Plăți', icon: CreditCard },
-    { href: '/admin/reports', title: 'Rapoarte', icon: BarChart },
-];
+import { useLanguage } from "@/contexts/language-context";
 
 export default function AdminLayout({
     children,
@@ -30,6 +21,17 @@ export default function AdminLayout({
     const { user, isUserLoading } = useUser();
     const router = useRouter();
     const firestore = useFirestore();
+    const { t } = useLanguage();
+
+    const navItems: NavItem[] = [
+        { href: '/admin/dashboard', title: t('adminLayout.nav.dashboard'), icon: LayoutDashboard },
+        { href: '/admin/users', title: t('adminLayout.nav.users'), icon: Users },
+        { href: '/admin/partners', title: t('adminLayout.nav.partners'), icon: Building },
+        { href: '/admin/offers', title: t('adminLayout.nav.offers'), icon: Gift },
+        { href: '/admin/invites', title: t('adminLayout.nav.invites'), icon: Mail },
+        { href: '/admin/payments', title: t('adminLayout.nav.payments'), icon: CreditCard },
+        { href: '/admin/reports', title: t('adminLayout.nav.reports'), icon: BarChart },
+    ];
 
     const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
     const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
@@ -45,7 +47,7 @@ export default function AdminLayout({
     if (isUserLoading || isProfileLoading || !userProfile) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
-                <p>Se încarcă...</p>
+                <p>{t('loading')}...</p>
             </div>
         );
     }
@@ -78,7 +80,7 @@ export default function AdminLayout({
                 </SidebarContent>
                 <SidebarFooter>
                     <div className="text-xs text-muted-foreground p-2 text-center group-data-[collapsible=icon]:hidden">
-                        <p>Autentificat ca {userRole}</p>
+                        <p>{t('adminLayout.loggedInAs', { role: userRole })}</p>
                     </div>
                 </SidebarFooter>
             </Sidebar>
