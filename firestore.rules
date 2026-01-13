@@ -24,15 +24,15 @@ service cloud.firestore {
     }
 
     // -------------------------------------------------------------------------
-    // User Collection Rules
+    // User Rules
     // -------------------------------------------------------------------------
 
     match /users/{userId} {
-      // Admins can get any user document. Users can get their own.
-      allow get: if isAdmin() || isOwner(userId);
+      // Admins can read any user doc. Users can read their own.
+      allow get: if isOwner(userId) || isAdmin();
       
-      // Admins can update any user document. Users can update their own.
-      allow update: if isAdmin() || isOwner(userId);
+      // Admins can update any user doc. Users can update their own.
+      allow update: if isOwner(userId) || isAdmin();
       
       // Only admins can delete user documents.
       allow delete: if isAdmin();
@@ -51,9 +51,11 @@ service cloud.firestore {
       }
     }
     
-    // This rule allows admins to list all users, which is needed for the admin user management page
-    match /users/{document=**} {
-        allow list, create: if isAdmin() || isSignedIn();
+    // Grant list permission for the entire /users collection to admins
+    match /users {
+      allow list: if isAdmin();
+      // Allow any signed-in user to create their own user document
+      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
     }
 
 
@@ -68,7 +70,8 @@ service cloud.firestore {
 
     match /offers/{offerId} {
       allow get, list: if true;
-      allow create: if isAdmin() || isPartner();
+      allow create: if (isAdmin() || isPartner());
+      // A partner can only update/delete offers they own. Admins can do anything.
       allow update, delete: if isAdmin() || (isPartner() && resource.data.partnerId == request.auth.uid);
     }
     
