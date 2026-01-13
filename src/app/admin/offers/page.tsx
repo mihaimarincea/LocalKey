@@ -73,7 +73,7 @@ export default function AdminOffersPage() {
                 <OfferTableRowSkeleton key={i} />
             ))}
             {offers?.map(offer => {
-              const expiresAtDate = offer.expiresAt instanceof Date ? offer.expiresAt : (offer.expiresAt as any).toDate();
+              const expiresAtDate = (offer.expiresAt as any).toDate();
               return (
               <TableRow key={offer.id}>
                 <TableCell>

@@ -67,7 +67,9 @@ export default function PartnerOffersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {partnerOffers.map(offer => (
+            {partnerOffers.map(offer => {
+              const expiresAtDate = (offer.expiresAt as any).toDate();
+              return (
               <TableRow key={offer.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -82,7 +84,7 @@ export default function PartnerOffersPage() {
                   {offer.category}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(offer.expiresAt as Date, "PPP", { locale })}
+                  {format(expiresAtDate, "PPP", { locale })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -103,7 +105,7 @@ export default function PartnerOffersPage() {
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </CardContent>

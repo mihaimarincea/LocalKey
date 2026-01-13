@@ -25,7 +25,7 @@ interface OfferCardProps {
 export function OfferCard({ offer }: OfferCardProps) {
     const { language, t } = useLanguage();
     const locale = language === 'ro' ? ro : enUS;
-    const expiresAtDate = offer.expiresAt instanceof Date ? offer.expiresAt : (offer.expiresAt as any).toDate();
+    const expiresAtDate = (offer.expiresAt as any).toDate();
   return (
     <Card className="flex flex-col overflow-hidden h-full">
       <CardHeader className="p-0">
@@ -33,9 +33,9 @@ export function OfferCard({ offer }: OfferCardProps) {
           <Image
             alt={offer.title}
             className="aspect-[3/2] w-full object-cover"
-            height="400"
+            height={400}
             src={offer.imageUrl}
-            width="600"
+            width={600}
             data-ai-hint="food drink"
           />
         </div>

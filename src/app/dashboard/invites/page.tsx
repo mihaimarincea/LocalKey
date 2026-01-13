@@ -77,17 +77,19 @@ export default function InvitesPage() {
                 <CardContent>
                     <div className="space-y-2">
                     {isLoading && Array.from({ length: 1 }).map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
-                    {usedInvites.map(invite => (
+                    {usedInvites.map(invite => {
+                        const redeemedAtDate = invite.redeemedAt ? (invite.redeemedAt as any).toDate() : null;
+                        return (
                         <div key={invite.id} className="flex items-center justify-between p-3 rounded-md border">
                             <div>
                                 <p className="font-mono">{invite.code}</p>
-                                {invite.redeemedByUserId && invite.redeemedAt &&
-                                <p className="text-sm text-muted-foreground">{t('dashboardUser.invites.usedBy', { userId: invite.redeemedByUserId.substring(0,8) + '...', date: format((invite.redeemedAt as any).toDate(), "PPP", { locale }) })}</p>
+                                {invite.redeemedByUserId && redeemedAtDate &&
+                                <p className="text-sm text-muted-foreground">{t('dashboardUser.invites.usedBy', { userId: invite.redeemedByUserId.substring(0,8) + '...', date: format(redeemedAtDate, "PPP", { locale }) })}</p>
                                 }
                             </div>
                             <Badge variant="secondary">{t('dashboardUser.invites.statusUsed')}</Badge>
                         </div>
-                    ))}
+                    )})}
                      {!isLoading && usedInvites.length === 0 && (
                         <div className="text-center text-muted-foreground py-4">
                             <p>{t('dashboardUser.invites.noUsedInvites')}</p>

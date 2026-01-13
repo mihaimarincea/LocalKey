@@ -121,7 +121,7 @@ export default function AdminPartnersPage() {
                 <PartnerTableRowSkeleton key={i} />
                 ))}
                 {partners?.map(partner => {
-                const createdAtDate = partner.createdAt instanceof Date ? partner.createdAt : (partner.createdAt as any).toDate();
+                const createdAtDate = (partner.createdAt as any).toDate();
                 return (
                 <TableRow key={partner.id}>
                     <TableCell className="font-medium">{partner.companyName}</TableCell>
