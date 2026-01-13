@@ -1,3 +1,5 @@
+
+'use client';
 import {
   Table,
   TableBody,
@@ -18,7 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { mockOffers } from "@/lib/data"
 import { format } from "date-fns"
-import { ro } from "date-fns/locale"
+import { ro, enUS } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -27,8 +29,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useLanguage } from "@/contexts/language-context"
 
 export default function PartnerOffersPage() {
+  const { t, language } = useLanguage();
+  const locale = language === 'ro' ? ro : enUS;
   // In a real app, filter for the current partner's offers
   const partnerOffers = mockOffers.filter(o => o.partnerId === 'partner-001' || o.partnerId === 'partner-004');
 
@@ -36,15 +41,15 @@ export default function PartnerOffersPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Ofertele Tale</CardTitle>
+          <CardTitle>{t('partnerLayout.offers.title')}</CardTitle>
           <CardDescription>
-            Gestionează ofertele tale active și inactive.
+            {t('partnerLayout.offers.subtitle')}
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Adaugă Ofertă
+            {t('partnerLayout.offers.add')}
           </span>
         </Button>
       </CardHeader>
@@ -52,12 +57,12 @@ export default function PartnerOffersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Stare</TableHead>
-              <TableHead>Ofertă</TableHead>
-              <TableHead className="hidden md:table-cell">Categorie</TableHead>
-              <TableHead className="hidden md:table-cell">Expiră la</TableHead>
+              <TableHead>{t('status')}</TableHead>
+              <TableHead>{t('partnerLayout.offers.offer')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('partnerLayout.offers.category')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('partnerLayout.offers.expiresAt')}</TableHead>
               <TableHead>
-                <span className="sr-only">Acțiuni</span>
+                <span className="sr-only">{t('actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -66,9 +71,9 @@ export default function PartnerOffersPage() {
               <TableRow key={offer.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Switch id={`status-${offer.id}`} checked={!offer.isPaused} aria-label="Comută starea ofertei" />
+                    <Switch id={`status-${offer.id}`} checked={!offer.isPaused} aria-label={t('partnerLayout.offers.toggleStatus')} />
                      <Badge variant={offer.isPaused ? "secondary" : "default"}>
-                        {offer.isPaused ? "Pauză" : "Activă"}
+                        {offer.isPaused ? t('partnerLayout.offers.statusPaused') : t('partnerLayout.offers.statusActive')}
                      </Badge>
                   </div>
                 </TableCell>
@@ -77,7 +82,7 @@ export default function PartnerOffersPage() {
                   {offer.category}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(offer.expiresAt, "PPP", { locale: ro })}
+                  {format(offer.expiresAt as Date, "PPP", { locale })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -88,11 +93,11 @@ export default function PartnerOffersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
-                      <DropdownMenuItem>Editează</DropdownMenuItem>
-                      <DropdownMenuItem>Vezi Statistici</DropdownMenuItem>
+                      <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
+                      <DropdownMenuItem>{t('partnerLayout.offers.edit')}</DropdownMenuItem>
+                      <DropdownMenuItem>{t('partnerLayout.offers.viewStats')}</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Șterge
+                        {t('partnerLayout.offers.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

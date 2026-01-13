@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
-import { ro } from "date-fns/locale"
+import { ro, enUS } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -31,25 +31,28 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { collection } from "firebase/firestore"
 import type { User } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useLanguage } from "@/contexts/language-context"
 
 export default function AdminUsersPage() {
   const firestore = useFirestore();
+  const { t, language } = useLanguage();
   const usersRef = useMemoFirebase(() => collection(firestore, "users"), [firestore]);
   const { data: users, isLoading } = useCollection<User>(usersRef);
+  const locale = language === 'ro' ? ro : enUS;
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Utilizatori</CardTitle>
+          <CardTitle>{t('adminLayout.users.title')}</CardTitle>
           <CardDescription>
-            Gestionează toți utilizatorii de pe platformă.
+            {t('adminLayout.users.subtitle')}
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Adaugă Utilizator
+            {t('adminLayout.users.add')}
           </span>
         </Button>
       </CardHeader>
@@ -58,18 +61,18 @@ export default function AdminUsersPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="hidden w-[100px] sm:table-cell">
-                <span className="sr-only">Imagine</span>
+                <span className="sr-only">{t('adminLayout.users.image')}</span>
               </TableHead>
-              <TableHead>Nume/Email</TableHead>
-              <TableHead>Rol</TableHead>
+              <TableHead>{t('adminLayout.users.nameEmail')}</TableHead>
+              <TableHead>{t('adminLayout.users.role')}</TableHead>
               <TableHead className="hidden md:table-cell">
-                Invitații
+                {t('adminLayout.users.invites')}
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                Creat la
+                {t('adminLayout.users.createdAt')}
               </TableHead>
               <TableHead>
-                <span className="sr-only">Acțiuni</span>
+                <span className="sr-only">{t('actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -98,7 +101,7 @@ export default function AdminUsersPage() {
                     {user.inviteCodeCount || 0}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {format(createdAtDate, "PPP", { locale: ro })}
+                    {format(createdAtDate, "PPP", { locale })}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
@@ -109,11 +112,11 @@ export default function AdminUsersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
-                        <DropdownMenuItem>Editează</DropdownMenuItem>
-                        <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
+                        <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
+                        <DropdownMenuItem>{t('adminLayout.users.edit')}</DropdownMenuItem>
+                        <DropdownMenuItem>{t('adminLayout.users.viewDetails')}</DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
-                          Suspendă
+                          {t('adminLayout.users.suspend')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

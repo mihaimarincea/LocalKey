@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScanLine, VideoOff, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/language-context";
 
 export function QrCodeScanner() {
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -17,6 +18,7 @@ export function QrCodeScanner() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { toast } = useToast();
+    const { t } = useLanguage();
 
     // Request camera permission and start video stream
     useEffect(() => {
@@ -25,8 +27,8 @@ export function QrCodeScanner() {
                 console.error("Media Devices API not supported");
                 toast({
                     variant: "destructive",
-                    title: "Eroare Cameră",
-                    description: "Browser-ul tău nu suportă funcționalitatea camerei.",
+                    title: t('partnerLayout.scan.cameraError'),
+                    description: t('partnerLayout.scan.cameraNotSupported'),
                 });
                 setHasCameraPermission(false);
                 return;
@@ -43,8 +45,8 @@ export function QrCodeScanner() {
                 setHasCameraPermission(false);
                 toast({
                     variant: "destructive",
-                    title: "Acces la Cameră Refuzat",
-                    description: "Te rugăm să permiți accesul la cameră în setările browser-ului.",
+                    title: t('partnerLayout.scan.permissionDenied'),
+                    description: t('partnerLayout.scan.permissionPlease'),
                 });
             }
         };
@@ -57,7 +59,7 @@ export function QrCodeScanner() {
                 stream.getTracks().forEach(track => track.stop());
             }
         }
-    }, [toast]);
+    }, [toast, t]);
 
     // QR code scanning logic
     useEffect(() => {
@@ -111,8 +113,8 @@ export function QrCodeScanner() {
                     setTimeout(() => {
                         setValidationStatus('valid');
                         toast({
-                            title: "Cod Validat cu Succes!",
-                            description: `Răscumpărare înregistrată pentru utilizatorul ${data.userId.substring(0, 8)}...`,
+                            title: t('partnerLayout.scan.validationSuccess'),
+                            description: t('partnerLayout.scan.redemptionSuccess', { userId: data.userId.substring(0, 8) }),
                         });
                         
                         // Reset after a few seconds
@@ -129,8 +131,8 @@ export function QrCodeScanner() {
                 setValidationStatus('invalid');
                  toast({
                     variant: "destructive",
-                    title: "Cod QR Invalid",
-                    description: "Acest cod nu este un cod LOCALKEY valid.",
+                    title: t('partnerLayout.scan.invalidQr'),
+                    description: t('partnerLayout.scan.notAValidCode'),
                 });
                 // Reset after a few seconds
                 setTimeout(() => {
@@ -138,7 +140,7 @@ export function QrCodeScanner() {
                 }, 3000);
             }
         }
-    }, [scannedData, toast]);
+    }, [scannedData, toast, t]);
 
     const resetScanner = () => {
         setScannedData(null);
@@ -152,21 +154,21 @@ export function QrCodeScanner() {
                 return (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/90 text-center p-4">
                         <Loader2 className="mx-auto h-16 w-16 animate-spin text-primary" />
-                        <p className="mt-4 font-semibold text-lg">Se validează...</p>
+                        <p className="mt-4 font-semibold text-lg">{t('partnerLayout.scan.validating')}</p>
                     </div>
                 )
             case 'valid':
                  return (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-500/90 text-center p-4">
                         <CheckCircle className="mx-auto h-24 w-24 text-white" />
-                        <p className="mt-4 font-bold text-2xl text-white">VALIDAT</p>
+                        <p className="mt-4 font-bold text-2xl text-white">{t('partnerLayout.scan.validated')}</p>
                     </div>
                 )
             case 'invalid':
                  return (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-destructive/90 text-center p-4">
                         <XCircle className="mx-auto h-24 w-24 text-white" />
-                        <p className="mt-4 font-bold text-2xl text-white">INVALID</p>
+                        <p className="mt-4 font-bold text-2xl text-white">{t('partnerLayout.scan.invalid')}</p>
                     </div>
                 )
             case 'idle':
@@ -175,8 +177,8 @@ export function QrCodeScanner() {
                      return (
                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 text-center p-4">
                             <VideoOff className="mx-auto h-16 w-16 text-muted-foreground" />
-                            <p className="mt-2 font-semibold">Camera nu este disponibilă</p>
-                            <p className="mt-1 text-sm text-muted-foreground">Permite accesul la cameră pentru a scana.</p>
+                            <p className="mt-2 font-semibold">{t('partnerLayout.scan.cameraNotAvailable')}</p>
+                            <p className="mt-1 text-sm text-muted-foreground">{t('partnerLayout.scan.allowCamera')}</p>
                         </div>
                      )
                  }
@@ -189,8 +191,8 @@ export function QrCodeScanner() {
         <div className="flex h-screen w-full items-center justify-center bg-secondary">
             <Card className="w-full max-w-md mx-4">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Validează Răscumpărare</CardTitle>
-                    <CardDescription>Scanează codul QR al unui utilizator pentru a-i răscumpăra oferta.</CardDescription>
+                    <CardTitle className="text-2xl">{t('partnerLayout.scan.title')}</CardTitle>
+                    <CardDescription>{t('partnerLayout.scan.subtitle')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="relative flex aspect-square w-full items-center justify-center rounded-lg border-2 border-dashed bg-secondary mb-6 overflow-hidden">
@@ -201,23 +203,23 @@ export function QrCodeScanner() {
                     {hasCameraPermission && validationStatus === 'idle' && (
                         <div className="flex items-center gap-2">
                             <ScanLine className="h-6 w-6 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">Îndreaptă camera spre un cod QR</p>
+                            <p className="text-sm text-muted-foreground">{t('partnerLayout.scan.pointCamera')}</p>
                         </div>
                     )}
                     {hasCameraPermission === false && (
                         <Alert variant="destructive">
-                            <AlertTitle>Acces la Cameră Necesar</AlertTitle>
+                            <AlertTitle>{t('partnerLayout.scan.permissionNeeded')}</AlertTitle>
                             <AlertDescription>
-                                Te rugăm să permiți accesul la cameră în setările browser-ului pentru a utiliza această funcționalitate.
+                                {t('partnerLayout.scan.permissionPlease')}
                             </AlertDescription>
                         </Alert>
                     )}
                 </CardContent>
                 <CardFooter className="flex-col gap-4">
-                    <p className="text-xs text-muted-foreground">Sau introduceți codul manual:</p>
+                    <p className="text-xs text-muted-foreground">{t('partnerLayout.scan.enterManually')}</p>
                     <div className="flex w-full max-w-sm items-center space-x-2">
                         <Input type="text" placeholder="dk_tok_..." />
-                        <Button type="submit">Validează</Button>
+                        <Button type="submit">{t('partnerLayout.scan.validate')}</Button>
                     </div>
                 </CardFooter>
             </Card>

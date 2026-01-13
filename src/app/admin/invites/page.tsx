@@ -1,3 +1,5 @@
+
+'use client';
 import {
   Table,
   TableBody,
@@ -24,21 +26,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useLanguage } from "@/contexts/language-context"
 
 export default function AdminInvitesPage() {
+  const { t } = useLanguage();
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Coduri de Invitație</CardTitle>
+          <CardTitle>{t('adminLayout.invites.title')}</CardTitle>
           <CardDescription>
-            Gestionează și urmărește toate codurile de invitație.
+            {t('adminLayout.invites.subtitle')}
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Generează Coduri
+            {t('adminLayout.invites.generate')}
           </span>
         </Button>
       </CardHeader>
@@ -46,12 +51,12 @@ export default function AdminInvitesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Cod</TableHead>
-              <TableHead>Stare</TableHead>
-              <TableHead className="hidden md:table-cell">Invitat de (ID)</TableHead>
-              <TableHead className="hidden md:table-cell">Folosit de (ID)</TableHead>
+              <TableHead>{t('adminLayout.invites.code')}</TableHead>
+              <TableHead>{t('status')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('adminLayout.invites.invitedBy')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('adminLayout.invites.usedBy')}</TableHead>
               <TableHead>
-                <span className="sr-only">Acțiuni</span>
+                <span className="sr-only">{t('actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -61,7 +66,7 @@ export default function AdminInvitesPage() {
                 <TableCell className="font-mono">{invite.code}</TableCell>
                 <TableCell>
                   <Badge variant={invite.status === 'used' ? "secondary" : "default"}>
-                    {invite.status === 'used' ? 'Folosit' : 'Disponibil'}
+                    {invite.status === 'used' ? t('adminLayout.invites.statusUsed') : t('adminLayout.invites.statusAvailable')}
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
@@ -79,10 +84,10 @@ export default function AdminInvitesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
-                      <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
+                      <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
+                      <DropdownMenuItem>{t('adminLayout.invites.viewDetails')}</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Revocă
+                        {t('adminLayout.invites.revoke')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

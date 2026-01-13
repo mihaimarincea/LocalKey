@@ -7,10 +7,12 @@ import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import type { User } from "@/types";
 import AppLogo from "@/components/shared/app-logo";
+import { useLanguage } from "@/contexts/language-context";
 
 export default function ScanPage() {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
+    const { t } = useLanguage();
 
     const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
     const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
@@ -21,7 +23,7 @@ export default function ScanPage() {
         return (
             <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
                 <AppLogo />
-                <p className="mt-4 text-muted-foreground">Se încarcă...</p>
+                <p className="mt-4 text-muted-foreground">{t('loading')}...</p>
             </div>
         );
     }
@@ -37,8 +39,8 @@ export default function ScanPage() {
             <div className="w-full max-w-sm">
                 <div className="mb-6 text-center">
                     <AppLogo />
-                    <h1 className="mt-4 text-2xl font-bold">Acces Partener</h1>
-                    <p className="text-muted-foreground">Autentifică-te pentru a valida coduri QR.</p>
+                    <h1 className="mt-4 text-2xl font-bold">{t('partnerLayout.access.title')}</h1>
+                    <p className="text-muted-foreground">{t('partnerLayout.access.subtitle')}</p>
                 </div>
                 <LoginForm />
             </div>

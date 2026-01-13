@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
-import { ro } from "date-fns/locale"
+import { ro, enUS } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -29,25 +29,28 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { collection } from "firebase/firestore"
 import type { Partner } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useLanguage } from "@/contexts/language-context"
 
 export default function AdminPartnersPage() {
   const firestore = useFirestore();
+  const { t, language } = useLanguage();
   const partnersRef = useMemoFirebase(() => collection(firestore, "partners"), [firestore]);
   const { data: partners, isLoading } = useCollection<Partner>(partnersRef);
+  const locale = language === 'ro' ? ro : enUS;
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Parteneri</CardTitle>
+          <CardTitle>{t('adminLayout.partners.title')}</CardTitle>
           <CardDescription>
-            Gestionează toți partenerii de pe platformă.
+            {t('adminLayout.partners.subtitle')}
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Adaugă Partener
+            {t('adminLayout.partners.add')}
           </span>
         </Button>
       </CardHeader>
@@ -55,19 +58,19 @@ export default function AdminPartnersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nume</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>{t('adminLayout.partners.name')}</TableHead>
+              <TableHead>{t('email')}</TableHead>
               <TableHead className="hidden md:table-cell">
-                Oferte
+                {t('adminLayout.partners.offers')}
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                Răscumpărări
+                {t('adminLayout.partners.redemptions')}
               </TableHead>
               <TableHead className="hidden md:table-cell">
-                Data Aderării
+                {t('adminLayout.partners.joinedDate')}
               </TableHead>
               <TableHead>
-                <span className="sr-only">Acțiuni</span>
+                <span className="sr-only">{t('actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -88,7 +91,7 @@ export default function AdminPartnersPage() {
                   {partner.totalRedemptions.toLocaleString()}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(createdAtDate, "PPP", { locale: ro })}
+                  {format(createdAtDate, "PPP", { locale })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -99,11 +102,11 @@ export default function AdminPartnersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
-                      <DropdownMenuItem>Editează</DropdownMenuItem>
-                      <DropdownMenuItem>Vezi Panou</DropdownMenuItem>
+                      <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
+                      <DropdownMenuItem>{t('adminLayout.partners.edit')}</DropdownMenuItem>
+                      <DropdownMenuItem>{t('adminLayout.partners.viewDashboard')}</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Dezactivează
+                        {t('adminLayout.partners.deactivate')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

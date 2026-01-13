@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
-import { ro } from "date-fns/locale"
+import { ro, enUS } from "date-fns/locale"
 import { MoreHorizontal, PlusCircle } from "lucide-react"
 import {
   DropdownMenu,
@@ -30,25 +30,28 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { collection } from "firebase/firestore"
 import type { Offer } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useLanguage } from "@/contexts/language-context"
 
 export default function AdminOffersPage() {
   const firestore = useFirestore();
+  const { t, language } = useLanguage();
   const offersRef = useMemoFirebase(() => collection(firestore, "offers"), [firestore]);
   const { data: offers, isLoading } = useCollection<Offer>(offersRef);
+  const locale = language === 'ro' ? ro : enUS;
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Oferte</CardTitle>
+          <CardTitle>{t('adminLayout.offers.title')}</CardTitle>
           <CardDescription>
-            Gestionează toate ofertele de pe platformă.
+            {t('adminLayout.offers.subtitle')}
           </CardDescription>
         </div>
         <Button size="sm" className="gap-1">
           <PlusCircle className="h-3.5 w-3.5" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Adaugă Ofertă
+            {t('adminLayout.offers.add')}
           </span>
         </Button>
       </CardHeader>
@@ -56,12 +59,12 @@ export default function AdminOffersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Stare</TableHead>
-              <TableHead>Titlu Ofertă</TableHead>
-              <TableHead className="hidden md:table-cell">Partener</TableHead>
-              <TableHead className="hidden md:table-cell">Expiră la</TableHead>
+              <TableHead>{t('status')}</TableHead>
+              <TableHead>{t('adminLayout.offers.offerTitle')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('adminLayout.offers.partner')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('adminLayout.offers.expiresAt')}</TableHead>
               <TableHead>
-                <span className="sr-only">Acțiuni</span>
+                <span className="sr-only">{t('actions')}</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -75,7 +78,7 @@ export default function AdminOffersPage() {
               <TableRow key={offer.id}>
                 <TableCell>
                   <Badge variant={offer.isPaused ? "secondary" : "default"}>
-                    {offer.isPaused ? "Pauză" : "Activă"}
+                    {offer.isPaused ? t('adminLayout.offers.statusPaused') : t('adminLayout.offers.statusActive')}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-medium">{offer.title}</TableCell>
@@ -83,7 +86,7 @@ export default function AdminOffersPage() {
                   {offer.partnerName}
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {format(expiresAtDate, "PPP", { locale: ro })}
+                  {format(expiresAtDate, "PPP", { locale })}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -94,11 +97,11 @@ export default function AdminOffersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Acțiuni</DropdownMenuLabel>
-                      <DropdownMenuItem>Editează</DropdownMenuItem>
-                      <DropdownMenuItem>Vezi Detalii</DropdownMenuItem>
+                      <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
+                      <DropdownMenuItem>{t('adminLayout.offers.edit')}</DropdownMenuItem>
+                      <DropdownMenuItem>{t('adminLayout.offers.viewDetails')}</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Șterge
+                        {t('adminLayout.offers.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

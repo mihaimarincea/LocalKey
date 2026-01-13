@@ -14,29 +14,32 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-
-const chartData = [
-  { month: "Ianuarie", redemptions: 186 },
-  { month: "Februarie", redemptions: 305 },
-  { month: "Martie", redemptions: 237 },
-  { month: "Aprilie", redemptions: 273 },
-  { month: "Mai", redemptions: 209 },
-  { month: "Iunie", redemptions: 214 },
-]
-
-const chartConfig = {
-  redemptions: {
-    label: "Răscumpărări",
-    color: "hsl(var(--primary))",
-  },
-}
+import { useLanguage } from "@/contexts/language-context"
 
 export function StatsChart() {
+  const { t } = useLanguage();
+
+  const chartData = [
+    { month: t('adminLayout.charts.months.january'), redemptions: 186 },
+    { month: t('adminLayout.charts.months.february'), redemptions: 305 },
+    { month: t('adminLayout.charts.months.march'), redemptions: 237 },
+    { month: t('adminLayout.charts.months.april'), redemptions: 273 },
+    { month: t('adminLayout.charts.months.may'), redemptions: 209 },
+    { month: t('adminLayout.charts.months.june'), redemptions: 214 },
+  ]
+  
+  const chartConfig = {
+    redemptions: {
+      label: t('adminLayout.charts.redemptionsLabel'),
+      color: "hsl(var(--primary))",
+    },
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Prezentare Generală Răscumpărări</CardTitle>
-        <CardDescription>Ianuarie - Iunie 2024</CardDescription>
+        <CardTitle>{t('adminLayout.charts.redemptionsOverview')}</CardTitle>
+        <CardDescription>{t('adminLayout.charts.dateRange')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="min-h-[200px] w-full">

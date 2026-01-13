@@ -1,6 +1,9 @@
+
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Offer } from "@/types";
 import { MapPin } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
 
 interface MapViewProps {
     offers: Offer[];
@@ -25,11 +28,12 @@ interface MapViewProps {
 // </APIProvider>
 
 export function MapView({ offers }: MapViewProps) {
+  const { t } = useLanguage();
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Oferte Lângă Tine</CardTitle>
-        <CardDescription>Găsește oferte în zona ta. Apasă pe un pin pentru detalii.</CardDescription>
+        <CardTitle>{t('dashboardUser.page.offersNearYou')}</CardTitle>
+        <CardDescription>{t('dashboardUser.page.findOffersInArea')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div 
@@ -38,9 +42,9 @@ export function MapView({ offers }: MapViewProps) {
         >
           <div className="text-center text-muted-foreground">
             <MapPin className="mx-auto h-12 w-12" />
-            <p className="mt-2 font-semibold">Vizualizare Hartă</p>
-            <p className="mt-1 text-sm">O hartă reală ar afișa {offers.length} oferte lângă tine.</p>
-            <p className="mt-4 text-xs">Pentru a activa, adaugă cheia ta API Google Maps.</p>
+            <p className="mt-2 font-semibold">{t('dashboardUser.page.mapPlaceholder')}</p>
+            <p className="mt-1 text-sm">{t('dashboardUser.page.mapExplanation', { count: offers.length })}</p>
+            <p className="mt-4 text-xs">{t('dashboardUser.page.mapActivation')}</p>
           </div>
         </div>
       </CardContent>

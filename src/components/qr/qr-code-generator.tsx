@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck, ShieldOff, WifiOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/firebase";
+import { useLanguage } from "@/contexts/language-context";
 
 const QR_VALIDITY_SECONDS = 60;
 
 export function QrCodeGenerator() {
   const { user } = useUser();
+  const { t } = useLanguage();
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(QR_VALIDITY_SECONDS);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export function QrCodeGenerator() {
   const generateQrCode = () => {
     if (!user) {
         setLoading(false);
-        toast({ title: "Utilizator neautentificat", description: "Vă rugăm să vă autentificați pentru a genera un cod QR.", variant: "destructive"});
+        toast({ title: t('dashboardUser.qr.unauthenticated'), description: t('dashboardUser.qr.pleaseLogin'), variant: "destructive"});
         return;
     };
 
@@ -53,12 +55,12 @@ export function QrCodeGenerator() {
       return () => clearInterval(timer);
     } else if (timeLeft === 0 && qrCodeUrl) {
         toast({
-            title: "Cod QR Expirat",
-            description: "Te rugăm să generezi un nou cod pentru răscumpărare.",
+            title: t('dashboardUser.qr.expiredTitle'),
+            description: t('dashboardUser.qr.expiredDescription'),
             variant: "destructive"
         })
     }
-  }, [qrCodeUrl, timeLeft, toast]);
+  }, [qrCodeUrl, timeLeft, toast, t]);
 
   const progress = (timeLeft / QR_VALIDITY_SECONDS) * 100;
   const isExpired = timeLeft <= 0;
@@ -66,8 +68,8 @@ export function QrCodeGenerator() {
   return (
     <Card className="w-full max-w-sm text-center shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Codul Tău QR Personal</CardTitle>
-        <CardDescription>Prezintă acest cod partenerului pentru a răscumpăra oferta.</CardDescription>
+        <CardTitle className="text-2xl">{t('dashboardUser.qr.personalCode')}</CardTitle>
+        <CardDescription>{t('dashboardUser.qr.presentCode')}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center gap-4">
         <div className="relative w-[300px] h-[300px] flex items-center justify-center">
@@ -85,7 +87,7 @@ export function QrCodeGenerator() {
               {isExpired && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
                   <ShieldOff className="h-16 w-16 text-destructive" />
-                  <p className="mt-2 font-bold text-destructive">EXPIRAT</p>
+                  <p className="mt-2 font-bold text-destructive">{t('dashboardUser.qr.expired').toLocaleUpperCase()}</p>
                 </div>
               )}
             </>
@@ -93,26 +95,26 @@ export function QrCodeGenerator() {
           {!loading && !qrCodeUrl && (
              <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80">
                 <WifiOff className="h-16 w-16 text-muted-foreground" />
-                <p className="mt-2 font-bold text-muted-foreground">Nu s-a putut genera codul QR</p>
+                <p className="mt-2 font-bold text-muted-foreground">{t('dashboardUser.qr.couldNotGenerate')}</p>
             </div>
           )}
         </div>
         <div className="w-full space-y-2">
             <Progress value={progress} className="h-2" />
             <p className={`text-sm font-mono ${isExpired ? 'text-destructive' : 'text-muted-foreground'}`}>
-                {isExpired ? "Cod expirat" : `Expiră în ${timeLeft}s`}
+                {isExpired ? t('dashboardUser.qr.expired') : t('dashboardUser.qr.expiresIn', { timeLeft })}
             </p>
         </div>
       </CardContent>
       <CardFooter className="flex-col gap-4">
         {isExpired ? (
             <Button onClick={generateQrCode} className="w-full">
-                Generează Cod Nou
+                {t('dashboardUser.qr.generateNew')}
             </Button>
         ) : (
             <div className="flex items-center text-sm text-green-700 dark:text-green-400 p-2 bg-green-50 dark:bg-green-950 rounded-md">
                 <ShieldCheck className="h-4 w-4 mr-2" />
-                <span>Codul tău este activ și securizat.</span>
+                <span>{t('dashboardUser.qr.activeAndSecure')}</span>
             </div>
         )}
       </CardFooter>

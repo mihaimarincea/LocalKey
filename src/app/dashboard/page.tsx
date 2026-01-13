@@ -5,9 +5,11 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Offer } from "@/types";
+import { useLanguage } from "@/contexts/language-context";
 
 export default function UserDashboardPage() {
   const firestore = useFirestore();
+  const { t } = useLanguage();
   const offersRef = useMemoFirebase(() => collection(firestore, "offers"), [firestore]);
   const activeOffersQuery = useMemoFirebase(() => offersRef && query(offersRef, where("isPaused", "==", false)), [offersRef]);
   
@@ -17,8 +19,8 @@ export default function UserDashboardPage() {
     <div className="grid flex-1 items-start gap-4 md:gap-8 lg:grid-cols-3 xl:grid-cols-4">
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
         <header>
-          <h1 className="text-3xl font-bold tracking-tight">Oferte Disponibile</h1>
-          <p className="text-muted-foreground mt-1">Răsfoiește ofertele de la partenerii locali.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('dashboardUser.page.availableOffers')}</h1>
+          <p className="text-muted-foreground mt-1">{t('dashboardUser.page.browseOffers')}</p>
         </header>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
             {isLoading && Array.from({ length: 6 }).map((_, i) => (
@@ -28,7 +30,7 @@ export default function UserDashboardPage() {
                 <OfferCard key={offer.id} offer={offer} />
             ))}
             {!isLoading && offers?.length === 0 && (
-              <p className="col-span-full text-center text-muted-foreground">Nu există oferte disponibile momentan.</p>
+              <p className="col-span-full text-center text-muted-foreground">{t('dashboardUser.page.noOffers')}</p>
             )}
         </div>
       </div>

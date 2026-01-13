@@ -1,6 +1,8 @@
+
+'use client';
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
-import { ro } from "date-fns/locale"
+import { ro, enUS } from "date-fns/locale"
 import {
   Card,
   CardContent,
@@ -15,12 +17,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Offer } from "@/types"
 import { Clock } from "lucide-react"
 import Link from "next/link"
+import { useLanguage } from "@/contexts/language-context"
 
 interface OfferCardProps {
   offer: Offer
 }
 
 export function OfferCard({ offer }: OfferCardProps) {
+    const { language, t } = useLanguage();
+    const locale = language === 'ro' ? ro : enUS;
     const expiresAtDate = offer.expiresAt instanceof Date ? offer.expiresAt : (offer.expiresAt as any).toDate();
   return (
     <Card className="flex flex-col overflow-hidden h-full">
@@ -52,10 +57,10 @@ export function OfferCard({ offer }: OfferCardProps) {
         <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                <span>Expiră {formatDistanceToNow(expiresAtDate, { addSuffix: true, locale: ro })}</span>
+                <span>Expiră {formatDistanceToNow(expiresAtDate, { addSuffix: true, locale })}</span>
             </div>
             <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
-                <Link href="/dashboard/qr">Răscumpără</Link>
+                <Link href="/dashboard/qr">{t('dashboardUser.qr.title')}</Link>
             </Button>
         </div>
       </CardFooter>

@@ -1,12 +1,16 @@
+
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
 
 export default function AdminReportsPage() {
+    const { t } = useLanguage();
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Rapoarte & Analize</CardTitle>
-                <CardDescription>Generează și vizualizează analize detaliate ale platformei.</CardDescription>
+                <CardTitle>{t('adminLayout.reports.title')}</CardTitle>
+                <CardDescription>{t('adminLayout.reports.subtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div 
@@ -15,8 +19,8 @@ export default function AdminReportsPage() {
                 >
                   <div className="text-center text-muted-foreground">
                     <BarChart className="mx-auto h-16 w-16" />
-                    <p className="mt-2 font-semibold">Panou de Analize</p>
-                    <p className="mt-1 text-sm">Aici ar fi disponibile instrumente avansate de raportare.</p>
+                    <p className="mt-2 font-semibold">{t('adminLayout.reports.placeholderTitle')}</p>
+                    <p className="mt-1 text-sm">{t('adminLayout.reports.placeholderDescription')}</p>
                   </div>
                 </div>
             </CardContent>
