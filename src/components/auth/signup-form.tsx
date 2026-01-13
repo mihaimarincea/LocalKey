@@ -72,7 +72,7 @@ export function SignupForm() {
         avatarUrl: user.photoURL,
         role: "user",
         createdAt: new Date(),
-        inviteCodeCount: 0,
+        inviteCodeCount: 3,
       };
 
       // Create user profile in Firestore, merging in case they already exist via another method.
@@ -110,7 +110,7 @@ export function SignupForm() {
         avatarUrl: user.photoURL || `https://avatar.vercel.sh/${user.email}.png`,
         role: "user", // default role
         createdAt: new Date(),
-        inviteCodeCount: 0,
+        inviteCodeCount: 3,
       };
       
       // Create user profile in Firestore

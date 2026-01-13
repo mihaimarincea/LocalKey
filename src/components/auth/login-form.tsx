@@ -73,7 +73,7 @@ export function LoginForm() {
         avatarUrl: user.photoURL,
         role: "user",
         createdAt: new Date(),
-        inviteCodeCount: 0,
+        inviteCodeCount: 3,
       };
 
       setDocumentNonBlocking(userDocRef, newUser, { merge: true });
