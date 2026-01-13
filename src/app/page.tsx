@@ -113,7 +113,7 @@ export default function AuthPage() {
             height="1080"
             priority
             data-ai-hint={bgImage.imageHint}
-            className="h-full w-full object-cover dark:brightness-[0.3]"
+            className="h-screen w-full object-cover dark:brightness-[0.3]"
           />
         )}
       </div>
