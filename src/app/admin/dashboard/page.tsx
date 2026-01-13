@@ -11,9 +11,21 @@ import { StatsChart } from "@/components/dashboard/stats-chart"
 import { FraudAlertGenerator } from "@/components/admin/fraud-alert-generator"
 import { DollarSign, Gift, Users, Building } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, collectionGroup, query } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminDashboardPage() {
   const { t } = useLanguage();
+  const firestore = useFirestore();
+
+  const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, "users")) : null, [firestore]);
+  const partnersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, "partners")) : null, [firestore]);
+  const redemptionsQuery = useMemoFirebase(() => firestore ? query(collectionGroup(firestore, "redemptions")) : null, [firestore]);
+
+  const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
+  const { data: partners, isLoading: partnersLoading } = useCollection(partnersQuery);
+  const { data: redemptions, isLoading: redemptionsLoading } = useCollection(redemptionsQuery);
 
   return (
     <div className="flex flex-col gap-6">
@@ -28,6 +40,7 @@ export default function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
+            {/* Placeholder - Revenue data is not tracked yet */}
             <div className="text-2xl font-bold">$45,231.89</div>
             <p className="text-xs text-muted-foreground">
               +20.1% {t('adminLayout.dashboard.fromLastMonth')}
@@ -40,9 +53,9 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
+            {usersLoading ? <Skeleton className="h-8 w-20" /> : <div className="text-2xl font-bold">{users?.length ?? 0}</div>}
             <p className="text-xs text-muted-foreground">
-              +180.1% {t('adminLayout.dashboard.fromLastMonth')}
+              Utilizatori înregistrați pe platformă
             </p>
           </CardContent>
         </Card>
@@ -52,9 +65,9 @@ export default function AdminDashboardPage() {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+57</div>
+            {partnersLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{partners?.length ?? 0}</div>}
             <p className="text-xs text-muted-foreground">
-              +19% {t('adminLayout.dashboard.fromLastMonth')}
+              Parteneri activi
             </p>
           </CardContent>
         </Card>
@@ -66,9 +79,9 @@ export default function AdminDashboardPage() {
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
+            {redemptionsLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{redemptions?.length ?? 0}</div>}
             <p className="text-xs text-muted-foreground">
-              +12% {t('adminLayout.dashboard.fromLastMonth')}
+             Oferte răscumpărate în total
             </p>
           </CardContent>
         </Card>
