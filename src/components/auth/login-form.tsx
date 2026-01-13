@@ -85,24 +85,20 @@ export function LoginForm() {
       const docSnap = await getDoc(userDocRef);
 
       if (!docSnap.exists()) {
-        const newUser = {
-            id: user.uid,
-            email: user.email,
-            name: user.displayName,
-            avatarUrl: user.photoURL,
-            role: "user",
-            createdAt: serverTimestamp(),
-            inviteCodeCount: 3,
-        };
-        setDocumentNonBlocking(userDocRef, newUser, { merge: true });
+        toast({
+            variant: "destructive",
+            title: "Cont inexistent",
+            description: "Te rugăm să te înregistrezi mai întâi folosind un cod de invitație.",
+        });
+        await auth.signOut();
       } else {
         await ensureInviteCodes(user.uid);
+        toast({
+            title: t('toast.loginSuccessTitle'),
+            description: t('toast.welcomeBack'),
+        });
       }
 
-      toast({
-        title: t('toast.loginSuccessTitle'),
-        description: t('toast.welcomeBack'),
-      });
     } catch (error: any) {
       console.error("Google Sign In Error:", error);
       toast({
@@ -130,7 +126,9 @@ export function LoginForm() {
       toast({
         variant: "destructive",
         title: t('toast.loginErrorTitle'),
-        description: error.message || t('toast.loginErrorDescription'),
+        description: error.code === 'auth/user-not-found' 
+            ? 'Niciun cont găsit cu acest email. Te rugăm să te înregistrezi.' 
+            : error.message || t('toast.loginErrorDescription'),
       });
     } finally {
       setLoading(false);

@@ -66,12 +66,28 @@ export const mockOffers: Offer[] = [
 
 export const mockInvites: Invite[] = [
     {
+        id: 'invite-001',
         code: 'LOCAL-F8B2C',
         status: 'used',
-        invitedBy: 'user-001',
-        usedBy: 'user-002',
+        generatedBy: 'user-001',
+        redeemedByUserId: 'user-002',
         createdAt: Timestamp.fromDate(new Date('2023-02-19T10:00:00Z')),
+        redeemedAt: Timestamp.fromDate(new Date('2023-02-20T11:00:00Z')),
     },
+    {
+        id: 'invite-002',
+        code: 'LOCAL-A9D4E',
+        status: 'available',
+        generatedBy: 'user-001',
+        createdAt: Timestamp.fromDate(new Date('2023-03-01T12:00:00Z')),
+    },
+     {
+        id: 'invite-003',
+        code: 'LOCAL-G5H6I',
+        status: 'available',
+        generatedBy: 'user-001',
+        createdAt: Timestamp.fromDate(new Date('2023-03-01T12:01:00Z')),
+    }
 ];
 
 export const mockRedemptions: Redemption[] = [

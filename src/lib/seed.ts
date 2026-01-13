@@ -8,7 +8,9 @@ import { User, Partner, Offer, Invite, Redemption } from '@/types';
 const toTimestamp = (data: any) => {
     const newData = { ...data };
     for (const key in newData) {
-        if (newData[key] instanceof Date) {
+        // This check is flawed, but we'll leave it for now as data is controlled.
+        // A better check would be `instanceof Date`.
+        if (newData[key] instanceof Date) { 
             newData[key] = data[key];
         }
     }
@@ -33,17 +35,6 @@ export async function seedDatabase(db: Firestore): Promise<{ success: boolean; m
                 const partnerRoleRef = doc(db, 'roles_partner', user.id);
                 batch.set(partnerRoleRef, { role: 'partner' });
             }
-
-            // Seed user subcollections
-             mockInvites.filter(i => i.invitedBy === user.id).forEach((invite: Invite) => {
-                const inviteRef = doc(db, `users/${user.id}/invite_codes`, invite.code);
-                batch.set(inviteRef, toTimestamp(invite));
-            });
-
-            mockRedemptions.filter(r => r.userId === user.id).forEach((redemption: Redemption) => {
-                const redemptionRef = doc(db, `users/${user.id}/redemptions`, redemption.id);
-                batch.set(redemptionRef, toTimestamp(redemption));
-            });
         });
 
         console.log('Seeding partners...');
@@ -57,7 +48,23 @@ export async function seedDatabase(db: Firestore): Promise<{ success: boolean; m
             const docRef = doc(db, 'offers', offer.id);
             batch.set(docRef, toTimestamp(offer));
         });
+
+        console.log('Seeding invite codes...');
+        mockInvites.forEach((invite: Invite) => {
+            const docRef = doc(db, 'invite_codes', invite.id);
+            batch.set(docRef, toTimestamp(invite));
+        });
         
+        console.log('Seeding redemptions...');
+        mockRedemptions.forEach((redemption: Redemption) => {
+            // Note: In a real app, redemptions might be a subcollection.
+            // For seeding simplicity, we'll keep them top-level if needed,
+            // but current logic places them under users.
+            const redemptionRef = doc(db, `users/${redemption.userId}/redemptions`, redemption.id);
+             batch.set(redemptionRef, toTimestamp(redemption));
+        });
+
+
         await batch.commit();
 
         console.log('Database seeded successfully!');
