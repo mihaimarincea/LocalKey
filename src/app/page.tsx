@@ -100,7 +100,7 @@ export default function AuthPage() {
           </div>
 
           <div className="mt-4 text-center text-sm">
-            &copy; {new Date().getFullYear()} LOCALKEY. {t('allRightsReserved')}.
+            &copy; {new Date().getFullYear()} LocalKey. {t('allRightsReserved')}.
           </div>
         </div>
       </div>
