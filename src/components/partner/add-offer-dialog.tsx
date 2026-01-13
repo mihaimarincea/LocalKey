@@ -49,6 +49,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const { user } = useUser();
   const [preview, setPreview] = useState<string | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const partnerDocRef = useMemoFirebase(() => user ? doc(firestore, `partners/${user.uid}`) : null, [user, firestore]);
   const { data: partnerProfile } = useDoc<Partner>(partnerDocRef);
@@ -214,7 +215,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
                         control={control}
                         name="expiresAt"
                         render={({ field }) => (
-                            <Popover>
+                            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                                 <PopoverTrigger asChild>
                                 <Button
                                     variant={"outline"}
@@ -231,7 +232,10 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
                                 <Calendar
                                     mode="single"
                                     selected={field.value}
-                                    onSelect={field.onChange}
+                                    onSelect={(date) => {
+                                        field.onChange(date);
+                                        setDatePickerOpen(false);
+                                    }}
                                     disabled={(date) => date < new Date()}
                                     initialFocus
                                 />
