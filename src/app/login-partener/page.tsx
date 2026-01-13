@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import AppLogo from '@/components/shared/app-logo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Partner } from '@/types';
@@ -47,24 +47,44 @@ export default function PartnerLoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
 
-      const partnerDocRef = doc(firestore, 'partners', user.uid);
-      const userDocRef = doc(firestore, 'users', user.uid);
-      
-      const partnerDoc = await doc(firestore, 'partners', user.uid).get();
-      const userDoc = await doc(firestore, 'users', user.uid).get();
+      const partnerDocSnap = await getDoc(doc(firestore, 'partners', user.uid));
+      const userDocSnap = await getDoc(doc(firestore, 'users', user.uid));
 
-      if (!userDoc.exists() || userDoc.data()?.role !== 'partner' || !partnerDoc.exists()) {
-        throw new Error('Nu a fost găsit un cont de partener asociat cu acest email.');
+      if (!userDocSnap.exists() || userDocSnap.data()?.role !== 'partner' || !partnerDocSnap.exists()) {
+        await auth.signOut();
+        toast({
+            variant: "destructive",
+            title: 'Eroare de Autentificare',
+            description: 'Nu a fost găsit un cont de partener asociat cu acest email.',
+        });
+        setLoading(false);
+        return;
       }
       
-      const partnerData = partnerDoc.data() as Partner;
+      const partnerData = partnerDocSnap.data() as Partner;
 
       if (partnerData.status === 'pending') {
-         throw new Error('Contul tău este în curs de aprobare. Vei fi notificat prin email.');
+         await auth.signOut();
+         toast({
+             variant: "destructive",
+             title: 'Cont în Așteptare',
+             description: 'Contul tău este în curs de aprobare. Vei fi notificat prin email.',
+             duration: 5000,
+         });
+         setLoading(false);
+         return;
       }
 
       if (partnerData.status === 'rejected') {
-        throw new Error('Contul tău a fost respins. Contactează suportul pentru detalii.');
+        await auth.signOut();
+        toast({
+            variant: "destructive",
+            title: 'Cont Respins',
+            description: 'Contul tău a fost respins. Contactează suportul pentru detalii.',
+            duration: 5000,
+        });
+        setLoading(false);
+        return;
       }
 
       // If approved, proceed to dashboard
@@ -81,7 +101,9 @@ export default function PartnerLoginPage() {
         title: 'Eroare de Autentificare',
         description: error.message || 'A apărut o problemă. Verifică datele și încearcă din nou.',
       });
-      auth.signOut(); // Sign out if validation fails after login
+      if (auth.currentUser) {
+        await auth.signOut();
+      }
     } finally {
       setLoading(false);
     }

@@ -16,21 +16,23 @@ export type PartnerStatus = 'pending' | 'approved' | 'rejected';
 
 export interface Partner {
   id: string; // Corresponds to the user UID
-  companyName: string;
-  cui: string;
-  regCom: string;
-  address: string;
-  city: string;
-  county: string;
-  iban: string;
-  bank: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
+  companyName?: string;
+  cui?: string;
+  regCom?: string;
+  address?: string;
+  city?: string;
+  county?: string;
+  iban?: string;
+  bank?: string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
   status: PartnerStatus;
   createdAt: Date | Timestamp;
-  offerCount: number;
-  totalRedemptions: number;
+  offerCount?: number;
+  totalRedemptions?: number;
+  name?: string;
+  email?: string;
 }
 
 export interface Offer {
@@ -75,3 +77,6 @@ export type NavItem = {
   label?: string;
   active?: boolean;
 }
+
+
+export type WithId<T> = T & { id: string };

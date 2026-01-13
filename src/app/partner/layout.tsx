@@ -8,7 +8,7 @@ import { LayoutDashboard, List, ScanLine } from 'lucide-react';
 import { useUser, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import type { User } from "@/types";
+import type { User, Partner } from "@/types";
 import { doc } from 'firebase/firestore';
 import { useLanguage } from "@/contexts/language-context";
 
@@ -32,15 +32,30 @@ export default function PartnerLayout({
     const userDocRef = useMemoFirebase(() => user ? doc(firestore, `users/${user.uid}`) : null, [user, firestore]);
     const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
 
+    const partnerDocRef = useMemoFirebase(() => user ? doc(firestore, `partners/${user.uid}`) : null, [user, firestore]);
+    const { data: partnerProfile, isLoading: isPartnerProfileLoading } = useDoc<Partner>(partnerDocRef);
+
     useEffect(() => {
         if (!isUserLoading && !user) {
-            router.push('/');
-        } else if (userProfile && userProfile.role !== 'partner') {
+            router.push('/login-partener');
+            return;
+        } 
+        
+        if (userProfile && userProfile.role !== 'partner') {
             router.push('/dashboard');
+            return;
         }
-    }, [user, userProfile, isUserLoading, router]);
 
-    if (isUserLoading || isProfileLoading || !userProfile) {
+        if (partnerProfile && partnerProfile.status !== 'approved') {
+            router.push('/login-partener');
+            return;
+        }
+
+    }, [user, userProfile, partnerProfile, isUserLoading, router]);
+
+    const isLoading = isUserLoading || isProfileLoading || isPartnerProfileLoading || !userProfile || !partnerProfile;
+
+    if (isLoading) {
         return (
             <div className="flex h-screen w-full items-center justify-center">
                 <p>{t('loading')}...</p>
