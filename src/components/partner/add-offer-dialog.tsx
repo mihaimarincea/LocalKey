@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
@@ -19,10 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Loader2, UploadCloud } from 'lucide-react';
-import { format } from 'date-fns';
+import { Loader2, UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
@@ -34,9 +31,7 @@ const offerSchema = z.object({
   title: z.string().min(5, 'Titlul trebuie să aibă cel puțin 5 caractere'),
   description: z.string().min(10, 'Descrierea trebuie să aibă cel puțin 10 caractere'),
   category: z.string().min(3, 'Categoria este obligatorie'),
-  expiresAt: z.date({
-    required_error: 'Data de expirare este obligatorie.',
-  }),
+  expiresAt: z.string().min(1, 'Data de expirare este obligatorie.'), // Changed to string for input type="date"
   image: z.instanceof(File).optional(),
 });
 
@@ -49,7 +44,6 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
   const firestore = useFirestore();
   const { user } = useUser();
   const [preview, setPreview] = useState<string | null>(null);
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const partnerDocRef = useMemoFirebase(() => user ? doc(firestore, `partners/${user.uid}`) : null, [user, firestore]);
   const { data: partnerProfile } = useDoc<Partner>(partnerDocRef);
@@ -60,7 +54,6 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
     control,
     reset,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<OfferFormValues>({
     resolver: zodResolver(offerSchema),
@@ -104,7 +97,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
             title: data.title,
             description: data.description,
             category: data.category,
-            expiresAt: data.expiresAt,
+            expiresAt: new Date(data.expiresAt), // Convert string back to Date for Firestore
             imageUrl: imageUrl, // Use the uploaded image URL
             partnerId: user.uid,
             partnerName: partnerProfile.companyName || 'Partener Necunoscut',
@@ -158,44 +151,19 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
 
             <div className="grid gap-2">
                 <Label>Imagine Ofertă</Label>
-                <Controller
-                    name="image"
-                    control={control}
-                    render={({ field: { onChange, value, ...rest } }) => (
-                        <>
-                            <Input
-                                id="image"
-                                type="file"
-                                accept="image/*,video/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                    if (e.target.files && e.target.files.length > 0) {
-                                        onChange(e.target.files[0]);
-                                    }
-                                }}
-                                {...rest}
-                            />
-                            <Label 
-                                htmlFor="image"
-                                className={cn(
-                                    "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-secondary/50 hover:bg-secondary",
-                                    errors.image && "border-destructive"
-                                )}
-                            >
-                                {preview ? (
-                                     <Image src={preview} alt="Previzualizare imagine" width={100} height={100} className="h-full w-auto object-contain rounded-md" />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
-                                        <UploadCloud className="w-8 h-8 mb-2" />
-                                        <p className="mb-2 text-sm">Apasă pentru a încărca</p>
-                                        <p className="text-xs">Imagine sau Video</p>
-                                    </div>
-                                )}
-                            </Label>
-                        </>
-                    )}
+                <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    className="file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                    {...register('image')}
                 />
-                 {errors.image && <p className="text-xs text-destructive">{errors.image.message}</p>}
+                 {errors.image && <p className="text-xs text-destructive">{(errors.image as any).message}</p>}
+                 {preview && (
+                     <div className="mt-2">
+                        <Image src={preview} alt="Previzualizare imagine" width={100} height={100} className="h-auto w-1/2 object-contain rounded-md" />
+                     </div>
+                 )}
             </div>
 
             <div className="grid gap-2">
@@ -211,38 +179,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
                 </div>
                  <div className="grid gap-2">
                     <Label htmlFor="expiresAt">Data expirării</Label>
-                     <Controller
-                        control={control}
-                        name="expiresAt"
-                        render={({ field }) => (
-                            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                                <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                    "w-full justify-start text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {field.value ? format(field.value, "PPP") : <span>Alege o dată</span>}
-                                </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={(date) => {
-                                        field.onChange(date);
-                                        setDatePickerOpen(false);
-                                    }}
-                                    disabled={(date) => date < new Date()}
-                                    initialFocus
-                                />
-                                </PopoverContent>
-                            </Popover>
-                        )}
-                    />
+                    <Input id="expiresAt" type="date" {...register('expiresAt')} />
                     {errors.expiresAt && <p className="text-xs text-destructive">{errors.expiresAt.message}</p>}
                 </div>
             </div>
