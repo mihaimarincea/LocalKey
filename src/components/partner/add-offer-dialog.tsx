@@ -31,8 +31,8 @@ const offerSchema = z.object({
   title: z.string().min(5, 'Titlul trebuie să aibă cel puțin 5 caractere'),
   description: z.string().min(10, 'Descrierea trebuie să aibă cel puțin 10 caractere'),
   category: z.string().min(3, 'Categoria este obligatorie'),
-  expiresAt: z.string().min(1, 'Data de expirare este obligatorie.'), // Changed to string for input type="date"
-  image: z.any().refine(files => files?.length > 0, 'Imaginea este obligatorie.'),
+  expiresAt: z.string().min(1, 'Data de expirare este obligatorie.'),
+  image: z.any().optional(), // Image is optional for draft
 });
 
 type OfferFormValues = z.infer<typeof offerSchema>;
@@ -48,27 +48,73 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
   const partnerDocRef = useMemoFirebase(() => user ? doc(firestore, `partners/${user.uid}`) : null, [user, firestore]);
   const { data: partnerProfile } = useDoc<Partner>(partnerDocRef);
 
+  const draftKey = user ? `offer-draft-${user.uid}` : null;
+
   const {
     register,
     handleSubmit,
     control,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<OfferFormValues>({
     resolver: zodResolver(offerSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      category: '',
+      expiresAt: '',
+    }
   });
 
+  const watchedValues = watch();
   const imageFile = watch('image');
+
+  // Save form data to localStorage on change
+  useEffect(() => {
+    if (draftKey && open) {
+      const { image, ...restOfValues } = watchedValues;
+      localStorage.setItem(draftKey, JSON.stringify(restOfValues));
+    }
+  }, [watchedValues, draftKey, open]);
+
+  // Load draft from localStorage when dialog opens
+  useEffect(() => {
+    if (draftKey && open) {
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        try {
+          const draftData = JSON.parse(savedDraft);
+          // Don't reset image, as File objects can't be stored in JSON
+          reset({
+            title: draftData.title || '',
+            description: draftData.description || '',
+            category: draftData.category || '',
+            expiresAt: draftData.expiresAt || '',
+          });
+          toast({
+              title: "Ciornă restaurată",
+              description: "Am încărcat ultima versiune a ofertei tale."
+          })
+        } catch (e) {
+          console.error("Failed to parse offer draft:", e);
+        }
+      }
+    }
+  }, [open, draftKey, reset, toast]);
+
 
   useEffect(() => {
     if (imageFile && imageFile.length > 0) {
       const file = imageFile[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      if (file instanceof File) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     } else {
       setPreview(null);
     }
@@ -80,7 +126,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
         return;
     }
     
-    const imageToUpload = data.image[0];
+    const imageToUpload = data.image && data.image[0];
 
     if (!imageToUpload) {
         toast({ variant: 'destructive', title: 'Eroare', description: 'Te rugăm să încarci o imagine pentru ofertă.' });
@@ -110,6 +156,11 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
             createdAt: serverTimestamp(),
             location: { lat: 34.0522, lng: -118.2437 }, // Mocked location
         });
+        
+        // Clear the draft from localStorage on successful submission
+        if (draftKey) {
+            localStorage.removeItem(draftKey);
+        }
 
         toast({
             title: 'Oferta a fost adăugată!',
@@ -134,8 +185,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
     <Dialog open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) {
-            reset();
-            setPreview(null);
+            // Don't reset form on close, so draft is maintained
         }
     }}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -143,7 +193,7 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
         <DialogHeader>
           <DialogTitle>Adaugă o ofertă nouă</DialogTitle>
           <DialogDescription>
-            Completează detaliile ofertei tale. Odată adăugată, va fi vizibilă pentru toți utilizatorii.
+            Completează detaliile ofertei tale. Datele tale sunt salvate automat ca o ciornă.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -190,7 +240,10 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
         
             <DialogFooter className="mt-4">
                 <DialogClose asChild>
-                    <Button type="button" variant="secondary">Anulează</Button>
+                    <Button type="button" variant="secondary" onClick={() => {
+                      reset();
+                      setPreview(null);
+                    }}>Anulează</Button>
                 </DialogClose>
                 <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
