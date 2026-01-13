@@ -25,7 +25,7 @@ export default function AuthPage() {
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userDocRef);
 
   useEffect(() => {
-    if (!isUserLoading && !isProfileLoading && user && userProfile) {
+    if (user && userProfile) {
         switch (userProfile.role) {
             case 'admin':
                 router.push('/admin/dashboard');
@@ -38,7 +38,7 @@ export default function AuthPage() {
                 break;
         }
     }
-  }, [user, userProfile, isUserLoading, isProfileLoading, router]);
+  }, [user, userProfile, router]);
 
   if (isUserLoading || user) {
     return (
