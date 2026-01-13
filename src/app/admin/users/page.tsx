@@ -10,9 +10,26 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PlusCircle, Search, Users, UserCheck, UserX } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection, query, where } from "firebase/firestore"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminUsersPage() {
   const { t } = useLanguage();
+  const firestore = useFirestore();
+
+  // Queries for stats
+  const usersQuery = useMemoFirebase(() => query(collection(firestore, "users"), where("role", "==", "user")), [firestore]);
+  const partnersQuery = useMemoFirebase(() => query(collection(firestore, "users"), where("role", "==", "partner")), [firestore]);
+
+  const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
+  const { data: partners, isLoading: partnersLoading } = useCollection(partnersQuery);
+
+  const totalUsers = users ? users.length : 0;
+  const activePartners = partners ? partners.length : 0;
+  // Placeholder for suspended users logic
+  const suspendedUsers = 0;
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,8 +48,8 @@ export default function AdminUsersPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,250</div>
-            <p className="text-xs text-muted-foreground">+180 from last month</p>
+            {usersLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{totalUsers}</div>}
+            <p className="text-xs text-muted-foreground">Utilizatori cu rol 'user'</p>
           </CardContent>
         </Card>
         <Card>
@@ -41,8 +58,8 @@ export default function AdminUsersPage() {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">57</div>
-            <p className="text-xs text-muted-foreground">+5 from last month</p>
+             {partnersLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{activePartners}</div>}
+            <p className="text-xs text-muted-foreground">Utilizatori cu rol 'partner'</p>
           </CardContent>
         </Card>
         <Card>
@@ -51,8 +68,8 @@ export default function AdminUsersPage() {
             <UserX className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-             <p className="text-xs text-muted-foreground">2 new suspensions</p>
+            <div className="text-2xl font-bold">{suspendedUsers}</div>
+             <p className="text-xs text-muted-foreground">Funcționalitate în dezvoltare</p>
           </CardContent>
         </Card>
       </div>
