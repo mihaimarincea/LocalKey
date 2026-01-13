@@ -80,7 +80,7 @@ export function SignupForm() {
 
       toast({
         title: t('toast.signUpSuccessTitle'),
-        description: t('toast.welcomeTo', { appName: 'LOCALKEY' }),
+        description: t('toast.welcomeTo'),
       });
     } catch (error: any) {
       console.error("Google Sign Up Error:", error);
@@ -116,7 +116,7 @@ export function SignupForm() {
       
       toast({
         title: t('toast.signUpSuccessTitle'),
-        description: t('toast.welcomeTo', { appName: 'LOCALKEY' }),
+        description: t('toast.welcomeTo'),
       });
     } catch (error: any) {
        console.error("Signup Error:", error);

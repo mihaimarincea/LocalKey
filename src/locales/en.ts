@@ -31,7 +31,7 @@ export const en = {
       loginErrorDescription: 'A problem occurred during login.',
   
       signUpSuccessTitle: 'Account Created!',
-      welcomeTo: 'Welcome to {{appName}}.',
+      welcomeTo: 'Welcome to LocalKey.',
       googleSignUpErrorTitle: 'Google Sign Up Error',
       googleSignUpErrorDescription: 'Could not create account. Please try again.',
       signUpErrorTitle: 'Sign Up Error',
@@ -64,7 +64,7 @@ export const en = {
       },
       invites: {
         title: 'Your Invites',
-        subtitle: 'Invite friends to LOCALKEY and unlock rewards.',
+        subtitle: 'Invite friends to LocalKey and unlock rewards.',
         availableCodes: 'Available Codes',
         remainingInvites: 'You have {{count}} invites left.',
         copyCode: 'Copy Code',
@@ -255,7 +255,7 @@ export const en = {
         validationSuccess: 'Code Validated Successfully!',
         redemptionSuccess: 'Redemption registered for user {{userId}}...',
         invalidQr: 'Invalid QR Code',
-        notAValidCode: 'This is not a valid LOCALKEY code.',
+        notAValidCode: 'This is not a valid LocalKey code.',
         pointCamera: 'Point the camera at a QR code',
         permissionNeeded: 'Camera Access Required',
         enterManually: 'Or enter the code manually:',

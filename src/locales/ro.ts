@@ -31,7 +31,7 @@ export const ro = {
       loginErrorDescription: 'A apărut o problemă la autentificare.',
   
       signUpSuccessTitle: 'Cont Creat!',
-      welcomeTo: 'Bun venit la {{appName}}.',
+      welcomeTo: 'Bun venit la LocalKey.',
       googleSignUpErrorTitle: 'Eroare la Înregistrare cu Google',
       googleSignUpErrorDescription: 'Nu s-a putut crea contul. Încercați din nou.',
       signUpErrorTitle: 'Eroare la Înregistrare',
@@ -64,7 +64,7 @@ export const ro = {
       },
       invites: {
         title: 'Invitațiile Tale',
-        subtitle: 'Invită prieteni pe LOCALKEY și deblochează recompense.',
+        subtitle: 'Invită prieteni pe LocalKey și deblochează recompense.',
         availableCodes: 'Coduri Disponibile',
         remainingInvites: 'Ai {{count}} invitații rămase.',
         copyCode: 'Copiază Cod',
@@ -255,7 +255,7 @@ export const ro = {
         validationSuccess: 'Cod Validat cu Succes!',
         redemptionSuccess: 'Răscumpărare înregistrată pentru utilizatorul {{userId}}...',
         invalidQr: 'Cod QR Invalid',
-        notAValidCode: 'Acest cod nu este un cod LOCALKEY valid.',
+        notAValidCode: 'Acest cod nu este un cod LocalKey valid.',
         pointCamera: 'Îndreaptă camera spre un cod QR',
         permissionNeeded: 'Acces la Cameră Necesar',
         enterManually: 'Sau introduceți codul manual:',

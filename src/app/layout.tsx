@@ -6,8 +6,8 @@ import { FirebaseClientProvider } from '@/firebase';
 import { LanguageProvider } from '@/contexts/language-context';
 
 export const metadata: Metadata = {
-  title: 'LOCALKEY',
-  description: 'Deblochează oferte locale.',
+  title: 'LocalKey',
+  description: 'Unlock local deals.',
 };
 
 export default function RootLayout({
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ro" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
