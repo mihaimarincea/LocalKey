@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
 import { ro, enUS } from "date-fns/locale"
-import { MoreHorizontal, PlusCircle } from "lucide-react"
+import { MoreHorizontal, PlusCircle, CheckCircle, XCircle } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,7 @@ import type { Partner, PartnerStatus } from "@/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useLanguage } from "@/contexts/language-context"
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function AdminPartnersPage() {
   const firestore = useFirestore();
@@ -51,6 +52,10 @@ export default function AdminPartnersPage() {
     if (status === 'approved') {
         const roleRef = doc(firestore, 'roles_partner', partnerId);
         batch.set(roleRef, { role: 'partner' });
+    } else if (status === 'rejected') {
+        // If a partner is rejected, we can remove their partner role if it exists
+        const roleRef = doc(firestore, 'roles_partner', partnerId);
+        batch.delete(roleRef);
     }
 
     try {
@@ -96,64 +101,83 @@ export default function AdminPartnersPage() {
         </Button>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('adminLayout.partners.name')}</TableHead>
-              <TableHead>{t('email')}</TableHead>
-              <TableHead>{t('status')}</TableHead>
-              <TableHead className="hidden md:table-cell">
-                {t('adminLayout.partners.joinedDate')}
-              </TableHead>
-              <TableHead>
-                <span className="sr-only">{t('actions')}</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && Array.from({ length: 4 }).map((_, i) => (
-              <PartnerTableRowSkeleton key={i} />
-            ))}
-            {partners?.map(partner => {
-              const createdAtDate = partner.createdAt instanceof Date ? partner.createdAt : (partner.createdAt as any).toDate();
-              return (
-              <TableRow key={partner.id}>
-                <TableCell className="font-medium">{partner.companyName}</TableCell>
-                <TableCell>{partner.contactEmail}</TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(partner.status)}>{partner.status}</Badge>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {format(createdAtDate, "PPP", { locale })}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Comută meniu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
-                      {partner.status !== 'approved' && 
-                        <DropdownMenuItem onClick={() => handleUpdateStatus(partner.id, 'approved')}>
-                            Approve
-                        </DropdownMenuItem>
-                      }
-                      {partner.status !== 'rejected' &&
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleUpdateStatus(partner.id, 'rejected')}>
-                            Reject
-                        </DropdownMenuItem>
-                      }
-                      <DropdownMenuItem>{t('adminLayout.partners.viewDashboard')}</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            )})}
-          </TableBody>
-        </Table>
+        <TooltipProvider>
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead>{t('adminLayout.partners.name')}</TableHead>
+                <TableHead>{t('email')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead className="hidden md:table-cell">
+                    {t('adminLayout.partners.joinedDate')}
+                </TableHead>
+                <TableHead className="text-right">
+                    <span>{t('actions')}</span>
+                </TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {isLoading && Array.from({ length: 4 }).map((_, i) => (
+                <PartnerTableRowSkeleton key={i} />
+                ))}
+                {partners?.map(partner => {
+                const createdAtDate = partner.createdAt instanceof Date ? partner.createdAt : (partner.createdAt as any).toDate();
+                return (
+                <TableRow key={partner.id}>
+                    <TableCell className="font-medium">{partner.companyName}</TableCell>
+                    <TableCell>{partner.contactEmail}</TableCell>
+                    <TableCell>
+                    <Badge variant={getStatusVariant(partner.status)}>{partner.status}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                    {format(createdAtDate, "PPP", { locale })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                            {partner.status !== 'approved' && 
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(partner.id, 'approved')}>
+                                            <CheckCircle className="h-4 w-4 text-green-600" />
+                                            <span className="sr-only">Approve</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Approve</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            }
+                            {partner.status !== 'rejected' &&
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={() => handleUpdateStatus(partner.id, 'rejected')}>
+                                            <XCircle className="h-4 w-4 text-destructive" />
+                                            <span className="sr-only">Reject</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Reject</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            }
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                        <span className="sr-only">View details</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>View details (not implemented)</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    </TableCell>
+                </TableRow>
+                )})}
+            </TableBody>
+            </Table>
+        </TooltipProvider>
       </CardContent>
     </Card>
   )
@@ -165,6 +189,6 @@ const PartnerTableRowSkeleton = () => (
         <TableCell><Skeleton className="h-4 w-40" /></TableCell>
         <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
         <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
-        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+        <TableCell><div className="flex justify-end gap-2"><Skeleton className="h-8 w-8" /><Skeleton className="h-8 w-8" /></div></TableCell>
     </TableRow>
 )
