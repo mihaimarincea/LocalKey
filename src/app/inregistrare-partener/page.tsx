@@ -45,10 +45,40 @@ export default function PartnerSignupPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<PartnerSignupFormValues>({
     resolver: zodResolver(partnerSignupSchema),
+    defaultValues: {
+        companyName: '',
+        cui: '',
+        regCom: '',
+        address: '',
+        city: '',
+        county: '',
+        iban: '',
+        bank: '',
+        contactName: '',
+        contactEmail: '',
+        contactPhone: '',
+        password: '',
+    }
   });
+
+  const handleAutofill = () => {
+    setValue('companyName', 'Test Company SRL');
+    setValue('cui', 'RO12345678');
+    setValue('regCom', 'J40/123/2023');
+    setValue('address', 'Strada Exemplului Nr. 123');
+    setValue('city', 'București');
+    setValue('county', 'Sector 1');
+    setValue('iban', 'RO49AAAA1234567890123456');
+    setValue('bank', 'Banca de Test');
+    setValue('contactName', 'Mihai Marincea');
+    setValue('contactEmail', 'mihaimarincea@gmail.com');
+    setValue('contactPhone', '0722123456');
+    setValue('password', 'Parola123##');
+  };
 
   const onSubmit = async (data: PartnerSignupFormValues) => {
     setLoading(true);
@@ -193,10 +223,13 @@ export default function PartnerSignupPage() {
                         {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                     </div>
 
-                    <div className="md:col-span-2 mt-4">
+                    <div className="md:col-span-2 mt-4 flex items-center gap-2">
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Trimite Aplicația
+                        </Button>
+                         <Button type="button" variant="outline" onClick={handleAutofill} className="w-full">
+                            Autocompletare (Test)
                         </Button>
                     </div>
                 </form>
