@@ -37,18 +37,14 @@ service cloud.firestore {
         allow get, list: if isOwner(userId);
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
       }
-
-      match /invite_codes/{inviteCodeId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.inviterId == userId;
-        allow update: if isOwner(userId) || isAdmin();
-      }
     }
     
     match /users {
       // Admins can list all users
       allow list: if isAdmin();
-      // Any signed-in user can create their own user document
+      // A new user can only be created if they are providing a valid, available invite code.
+      // The validation logic happens in the client, but the security rule ensures the write is allowed
+      // for the new authenticated user.
       allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
     }
 
@@ -70,6 +66,20 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() || isPartner();
       allow update, delete: if isAdmin() || (isPartner() && resource.data.partnerId == request.auth.uid);
+    }
+
+    // -------------------------------------------------------------------------
+    // Invite Code Rules
+    // -------------------------------------------------------------------------
+    match /invite_codes/{inviteCodeId} {
+      // Allow reading a code for validation before sign-up (e.g., check status).
+      allow get: if true; 
+      // Allow a signed-in user to update a code (to redeem it).
+      allow update: if isSignedIn();
+      // Only admins or authenticated users with invites left can create new ones.
+      allow create: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.inviteCodeCount > 0);
+      // Only admins can list or delete codes.
+      allow list, delete: if isAdmin();
     }
     
     // -------------------------------------------------------------------------

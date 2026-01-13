@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, serverTimestamp } from 'firebase/firestore';
+import { doc, serverTimestamp, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { useLanguage } from '@/contexts/language-context';
 
 const GoogleIcon = () => (
@@ -38,6 +38,7 @@ const GoogleIcon = () => (
 
 export function SignupForm() {
   const [loading, setLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
@@ -46,6 +47,7 @@ export function SignupForm() {
   const signupSchema = z.object({
     email: z.string().email({ message: t('validation.invalidEmail') }),
     password: z.string().min(8, { message: t('validation.passwordTooShort', { min: 8 }) }),
+    inviteCode: z.string().min(1, { message: "Invite code is required." }),
   });
 
   type SignupFormValues = z.infer<typeof signupSchema>;
@@ -53,35 +55,77 @@ export function SignupForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   });
 
+  const validateAndGetInviteDoc = async (code: string) => {
+    const invitesRef = collection(firestore, 'invite_codes');
+    const q = query(invitesRef, where('code', '==', code), where('status', '==', 'available'));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        toast({
+            variant: "destructive",
+            title: "Invalid Invite Code",
+            description: "The invite code is either invalid or has already been used.",
+        });
+        return null;
+    }
+    return querySnapshot.docs[0];
+  };
+
+  const processRegistration = async (user: any, inviteDoc: any) => {
+    const batch = writeBatch(firestore);
+
+    // 1. Create user document
+    const userDocRef = doc(firestore, "users", user.uid);
+    const newUser = {
+        id: user.uid,
+        email: user.email,
+        name: user.displayName || user.email?.split('@')[0] || 'New User',
+        avatarUrl: user.photoURL || `https://avatar.vercel.sh/${user.email}.png`,
+        role: "user",
+        createdAt: serverTimestamp(),
+        inviteCodeCount: 3, // Initial invite codes for a new user
+    };
+    batch.set(userDocRef, newUser);
+
+    // 2. Update invite code document
+    const inviteDocRef = doc(firestore, "invite_codes", inviteDoc.id);
+    batch.update(inviteDocRef, {
+        status: 'used',
+        redeemedByUserId: user.uid,
+        redeemedAt: serverTimestamp()
+    });
+
+    await batch.commit();
+
+    toast({
+        title: t('toast.signUpSuccessTitle'),
+        description: t('toast.welcomeTo'),
+    });
+  };
+
   const handleGoogleSignUp = async () => {
+    if (!inviteCode) {
+        toast({ variant: "destructive", title: "Invite code required" });
+        return;
+    }
     setLoading(true);
+
+    const inviteDoc = await validateAndGetInviteDoc(inviteCode);
+    if (!inviteDoc) {
+        setLoading(false);
+        return;
+    }
+
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      
-      const userDocRef = doc(firestore, "users", user.uid);
-      const newUser = {
-        id: user.uid,
-        email: user.email,
-        name: user.displayName,
-        avatarUrl: user.photoURL,
-        role: "user",
-        createdAt: serverTimestamp(),
-        inviteCodeCount: 3,
-      };
-
-      setDocumentNonBlocking(userDocRef, newUser, { merge: true });
-
-      toast({
-        title: t('toast.signUpSuccessTitle'),
-        description: t('toast.welcomeTo'),
-      });
+      await processRegistration(result.user, inviteDoc);
     } catch (error: any) {
       console.error("Google Sign Up Error:", error);
       toast({
@@ -97,27 +141,16 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormValues) => {
     setLoading(true);
+
+    const inviteDoc = await validateAndGetInviteDoc(data.inviteCode);
+    if (!inviteDoc) {
+        setLoading(false);
+        return;
+    }
+    
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const user = userCredential.user;
-
-      const userDocRef = doc(firestore, "users", user.uid);
-      const newUser = {
-        id: user.uid,
-        email: user.email,
-        name: user.displayName || user.email?.split('@')[0] || 'New User',
-        avatarUrl: user.photoURL || `https://avatar.vercel.sh/${user.email}.png`,
-        role: "user",
-        createdAt: serverTimestamp(),
-        inviteCodeCount: 3,
-      };
-      
-      setDocumentNonBlocking(userDocRef, newUser, { merge: true });
-      
-      toast({
-        title: t('toast.signUpSuccessTitle'),
-        description: t('toast.welcomeTo'),
-      });
+      await processRegistration(userCredential.user, inviteDoc);
     } catch (error: any) {
        console.error("Signup Error:", error);
       toast({
@@ -132,7 +165,22 @@ export function SignupForm() {
 
   return (
     <div className="grid gap-4">
-       <Button variant="outline" className="w-full" onClick={handleGoogleSignUp} disabled={loading}>
+      <div className="grid gap-2">
+        <Label htmlFor="inviteCode">Invite Code</Label>
+        <Input
+            id="inviteCode"
+            placeholder="LOCAL-XXXXX"
+            {...register('inviteCode')}
+            onChange={(e) => {
+                setInviteCode(e.target.value);
+                setValue('inviteCode', e.target.value);
+            }}
+            disabled={loading}
+        />
+        {errors.inviteCode && <p className="text-xs text-destructive">{errors.inviteCode.message}</p>}
+      </div>
+
+       <Button variant="outline" className="w-full" onClick={handleGoogleSignUp} disabled={loading || !inviteCode}>
         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
         {t('authPage.continueWithGoogle')}
       </Button>
@@ -165,7 +213,7 @@ export function SignupForm() {
           <Input id="password" type="password" {...register('password')} disabled={loading} />
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading || !inviteCode}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {t('authPage.createAccount')}
         </Button>
