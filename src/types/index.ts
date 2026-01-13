@@ -12,10 +12,22 @@ export interface User {
   inviteCodeCount?: number;
 }
 
+export type PartnerStatus = 'pending' | 'approved' | 'rejected';
+
 export interface Partner {
-  id: string;
-  name: string;
-  email: string;
+  id: string; // Corresponds to the user UID
+  companyName: string;
+  cui: string;
+  regCom: string;
+  address: string;
+  city: string;
+  county: string;
+  iban: string;
+  bank: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  status: PartnerStatus;
   createdAt: Date | Timestamp;
   offerCount: number;
   totalRedemptions: number;
@@ -39,11 +51,13 @@ export interface Offer {
 }
 
 export interface Invite {
+    id: string;
     code: string;
     status: 'available' | 'used';
-    invitedBy: string;
-    usedBy?: string;
+    generatedBy: string;
+    redeemedByUserId?: string;
     createdAt: Date | Timestamp;
+    redeemedAt?: Date | Timestamp;
 }
 
 export interface Redemption {

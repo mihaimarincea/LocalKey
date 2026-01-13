@@ -1,6 +1,7 @@
 
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import {LoginForm} from '@/components/auth/login-form';
@@ -31,6 +32,7 @@ export default function AuthPage() {
                 router.push('/admin/dashboard');
                 break;
             case 'partner':
+                 // This check can be enhanced once partner status is available
                 router.push('/partner/dashboard');
                 break;
             default:
@@ -94,6 +96,12 @@ export default function AuthPage() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          <div className="text-center text-sm">
+            <Link href="/login-partener" className="underline">
+              Sunteți partener? Autentificați-vă aici
+            </Link>
+          </div>
 
           <div className="flex justify-center">
             <LanguageSelector />

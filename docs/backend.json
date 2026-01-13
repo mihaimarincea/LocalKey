@@ -38,31 +38,69 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Partner",
       "type": "object",
-      "description": "Represents a partner location offering deals.",
+      "description": "Represents a partner location offering deals, awaiting approval.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the partner entity."
+          "description": "Unique identifier for the partner entity, matching the user ID."
         },
-        "name": {
+        "companyName": {
           "type": "string",
-          "description": "Name of the partner."
+          "description": "The legal name of the company."
         },
-        "location": {
+        "cui": {
           "type": "string",
-          "description": "Location of the partner (e.g., address, coordinates)."
+          "description": "Codul Unic de Înregistrare (CUI)."
+        },
+        "regCom": {
+          "type": "string",
+          "description": "Numărul de înregistrare la Registrul Comerțului."
+        },
+        "address": {
+          "type": "string",
+          "description": "The full address of the company headquarters."
+        },
+        "city": {
+          "type": "string",
+          "description": "The city of the company headquarters."
+        },
+        "county": {
+          "type": "string",
+          "description": "The county of the company headquarters."
+        },
+        "iban": {
+          "type": "string",
+          "description": "The company's bank account number (IBAN)."
+        },
+        "bank": {
+          "type": "string",
+          "description": "The name of the bank."
+        },
+        "contactName": {
+          "type": "string",
+          "description": "Name of the primary contact person."
         },
         "contactEmail": {
           "type": "string",
           "description": "Contact email for the partner.",
           "format": "email"
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "Contact phone for the partner."
+        },
+        "status": {
+          "type": "string",
+          "description": "The approval status of the partner.",
+          "enum": ["pending", "approved", "rejected"]
         }
       },
       "required": [
         "id",
-        "name",
-        "location",
-        "contactEmail"
+        "companyName",
+        "cui",
+        "contactEmail",
+        "status"
       ]
     },
     "Offer": {
@@ -211,11 +249,11 @@
           "schema": {
             "$ref": "#/backend/entities/Partner"
           },
-          "description": "Stores partner profiles. Each document is keyed by a unique Partner ID.",
+          "description": "Stores partner profiles, including applications. Each document is keyed by a unique user ID which will be assigned the partner role upon approval.",
           "params": [
             {
               "name": "partnerId",
-              "description": "The unique identifier for the partner."
+              "description": "The unique user ID for the partner."
             }
           ]
         }
@@ -297,6 +335,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the LocalKey application's core features, including user authentication, QR code generation for offer redemptions, usage tracking, and a mandatory invitation system, while prioritizing security and scalability. A top-level `invite_codes` collection is used to allow for efficient global queries to validate invite codes during user registration. This is more performant and scalable than querying a collection group. The rest of the structure emphasizes authorization independence through denormalization and structural segregation to simplify security rules and enable secure list operations."
+    "reasoning": "This Firestore structure is designed to support the LocalKey application's core features, including user authentication, a separate partner application flow with manual approval, QR code generation for offer redemptions, usage tracking, and a mandatory invitation system for regular users, while prioritizing security and scalability. A top-level `partners` collection is used for applications, allowing admins to easily list and review them. A top-level `invite_codes` collection is used to allow for efficient global queries to validate invite codes during user registration."
   }
 }
