@@ -29,6 +29,8 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
+      // Allow creation if the user is signing up.
+      allow create: if isOwner(userId);
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
 
@@ -42,10 +44,6 @@ service cloud.firestore {
     match /users {
       // Admins can list all users
       allow list: if isAdmin();
-      // A new user can only be created if they are providing a valid, available invite code.
-      // The validation logic happens in the client, but the security rule ensures the write is allowed
-      // for the new authenticated user.
-      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
     }
 
     // Allows admins to query across all users' redemptions for the dashboard
@@ -58,8 +56,8 @@ service cloud.firestore {
     // -------------------------------------------------------------------------
 
     match /partners/{partnerId} {
-      // Anyone can submit a partner application.
-      allow create: if true; 
+      // A user can create a partner application for themselves upon signup.
+      allow create: if isOwner(partnerId);
       // Only admins or the partner themselves can read the partner document.
       allow get: if isAdmin() || isOwner(partnerId);
       // Only admins can update (approve/reject), delete, or list partner applications.
