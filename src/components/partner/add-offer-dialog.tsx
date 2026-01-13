@@ -32,7 +32,7 @@ const offerSchema = z.object({
   description: z.string().min(10, 'Descrierea trebuie să aibă cel puțin 10 caractere'),
   category: z.string().min(3, 'Categoria este obligatorie'),
   expiresAt: z.string().min(1, 'Data de expirare este obligatorie.'), // Changed to string for input type="date"
-  image: z.instanceof(File).optional(),
+  image: z.any().refine(files => files?.length > 0, 'Imaginea este obligatorie.'),
 });
 
 type OfferFormValues = z.infer<typeof offerSchema>;
@@ -62,12 +62,13 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
   const imageFile = watch('image');
 
   useEffect(() => {
-    if (imageFile) {
+    if (imageFile && imageFile.length > 0) {
+      const file = imageFile[0];
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
       };
-      reader.readAsDataURL(imageFile);
+      reader.readAsDataURL(file);
     } else {
       setPreview(null);
     }
@@ -78,7 +79,10 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
         toast({ variant: 'destructive', title: 'Eroare', description: 'Trebuie să fii autentificat ca partener.' });
         return;
     }
-    if (!data.image) {
+    
+    const imageToUpload = data.image[0];
+
+    if (!imageToUpload) {
         toast({ variant: 'destructive', title: 'Eroare', description: 'Te rugăm să încarci o imagine pentru ofertă.' });
         return;
     }
@@ -87,8 +91,8 @@ export function AddOfferDialog({ children }: { children: React.ReactNode }) {
     try {
         // 1. Upload image to Firebase Storage
         const storage = getStorage();
-        const imageRef = ref(storage, `offer_images/${user.uid}/${Date.now()}_${data.image.name}`);
-        const uploadResult = await uploadBytes(imageRef, data.image);
+        const imageRef = ref(storage, `offer_images/${user.uid}/${Date.now()}_${imageToUpload.name}`);
+        const uploadResult = await uploadBytes(imageRef, imageToUpload);
         const imageUrl = await getDownloadURL(uploadResult.ref);
 
         // 2. Add offer to Firestore with the image URL
