@@ -11,21 +11,14 @@ import { StatsChart } from "@/components/dashboard/stats-chart"
 import { FraudAlertGenerator } from "@/components/admin/fraud-alert-generator"
 import { DollarSign, Gift, Users, Building } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, collectionGroup, query } from "firebase/firestore";
-import { Skeleton } from "@/components/ui/skeleton";
+import { mockUsers, mockPartners, mockRedemptions } from "@/lib/data";
 
 export default function AdminDashboardPage() {
   const { t } = useLanguage();
-  const firestore = useFirestore();
 
-  const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, "users")) : null, [firestore]);
-  const partnersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, "partners")) : null, [firestore]);
-  const redemptionsQuery = useMemoFirebase(() => firestore ? query(collectionGroup(firestore, "redemptions")) : null, [firestore]);
-
-  const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
-  const { data: partners, isLoading: partnersLoading } = useCollection(partnersQuery);
-  const { data: redemptions, isLoading: redemptionsLoading } = useCollection(redemptionsQuery);
+  const totalUsers = mockUsers.filter(u => u.role === 'user').length;
+  const totalPartners = mockPartners.length;
+  const totalRedemptions = mockRedemptions.length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,7 +46,7 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {usersLoading ? <Skeleton className="h-8 w-20" /> : <div className="text-2xl font-bold">{users?.length ?? 0}</div>}
+            <div className="text-2xl font-bold">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">
               Utilizatori înregistrați pe platformă
             </p>
@@ -65,7 +58,7 @@ export default function AdminDashboardPage() {
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {partnersLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{partners?.length ?? 0}</div>}
+            <div className="text-2xl font-bold">{totalPartners}</div>
             <p className="text-xs text-muted-foreground">
               Parteneri activi
             </p>
@@ -79,7 +72,7 @@ export default function AdminDashboardPage() {
             <Gift className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {redemptionsLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{redemptions?.length ?? 0}</div>}
+            <div className="text-2xl font-bold">{totalRedemptions}</div>
             <p className="text-xs text-muted-foreground">
              Oferte răscumpărate în total
             </p>
