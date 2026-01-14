@@ -2,10 +2,16 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Permite utilizatorilor autentificați să scrie imagini de oferte doar în folderul lor.
+
+    function isPartner(userId) {
+      return request.auth != null 
+        && request.auth.uid == userId 
+        && exists(/databases/$(database)/documents/partners/$(userId));
+    }
+
     match /offer_images/{userId}/{allPaths=**} {
-      allow read: if true; // Oricine poate citi imaginile ofertelor (pentru afișare în aplicație)
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+      allow write: if isPartner(userId);
     }
   }
 }
