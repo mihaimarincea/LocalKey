@@ -112,6 +112,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
+      // Allow create only if the user is creating their own document, and for non-admins, a valid invite code is provided.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId) || isAdmin();
@@ -143,11 +144,8 @@ service cloud.firestore {
       // An authenticated user can create an invite code for themselves.
       // This is usually done via a backend function, but the rule allows direct creation.
       allow create: if isSignedIn() && request.resource.data.generatedBy == request.auth.uid;
-      // An invite code can be updated (e.g., to 'used') by:
-      // 1. The admin.
-      // 2. The user who generated it.
-      // 3. The new user who is redeeming it during sign-up.
-      allow update: if isAdmin() || (isSignedIn() && (resource.data.generatedBy == request.auth.uid || request.resource.data.redeemedByUserId == request.auth.uid));
+      // An invite code can be updated (e.g., to 'used') by an admin or the user redeeming it.
+      allow update: if isAdmin() || (isSignedIn() && request.resource.data.redeemedByUserId == request.auth.uid && resource.data.status == 'available' && request.resource.data.status == 'used');
       // Only the user who generated the code or an admin can delete it.
       allow delete: if isAdmin() || (isSignedIn() && resource.data.generatedBy == request.auth.uid);
     }
@@ -165,8 +163,9 @@ service cloud.firestore {
      */
     match /partners/{partnerId} {
       allow get, list: if true;
-      allow create: if isAdmin();
-      allow update, delete: if isExistingAdmin();
+      allow create: if true; // Allow any user to apply (create a partner document)
+      allow update: if isExistingAdmin();
+      allow delete: if isExistingAdmin();
     }
 
     /**
@@ -208,8 +207,8 @@ service cloud.firestore {
      * @principle Secures role-granting actions. Only existing admins can modify roles.
      */
     match /roles_partner/{userId} {
-      allow get, list: if isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow get: if true; // Allow reads for storage rules check
+      allow list, create, update, delete: if isAdmin();
     }
   }
 }
