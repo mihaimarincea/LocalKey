@@ -74,7 +74,6 @@ export function SignupForm() {
 
   const validateAndGetInviteDoc = async (code: string): Promise<DocumentSnapshot<DocumentData> | null> => {
     if (!code) return null;
-    // Security rules use the invite code itself as the document ID
     const inviteDocRef = doc(firestore, 'invite_codes', code);
     const docSnap = await getDoc(inviteDocRef);
 
@@ -90,6 +89,7 @@ export function SignupForm() {
   };
 
   const processRegistration = async (user: FirebaseUser, inviteDoc: DocumentSnapshot<DocumentData> | null) => {
+    console.log("--- Starting Registration Process ---");
     const batch = writeBatch(firestore);
     const isInitialAdmin = user.email === ADMIN_EMAIL;
     const userRole = isInitialAdmin ? 'admin' : 'user';
@@ -106,29 +106,33 @@ export function SignupForm() {
         inviteCodeCount: isInitialAdmin ? 99 : 3, // Initial invite codes
     };
     
-    // Add invite code to user document so security rules can validate it on creation
     if (inviteDoc) {
         newUser.inviteCode = inviteDoc.id;
     }
 
+    console.log("DEBUG: Attempting to create user document with data:", newUser);
     batch.set(userDocRef, newUser);
 
     // Create role document for admin
     if (isInitialAdmin) {
         const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        console.log("DEBUG: Attempting to create admin role for user:", user.uid);
         batch.set(adminRoleRef, { role: 'admin' });
     }
 
     // 2. Update invite code document if it exists
     if (inviteDoc) {
         const inviteDocRef = doc(firestore, "invite_codes", inviteDoc.id);
-        batch.update(inviteDocRef, {
+        const updateData = {
             status: 'used',
             redeemedByUserId: user.uid,
             redeemedAt: serverTimestamp()
-        });
+        };
+        console.log(`DEBUG: Attempting to update invite_codes/${inviteDoc.id} with data:`, updateData);
+        batch.update(inviteDocRef, updateData);
     }
     
+    console.log("--- Committing batch write ---");
     await batch.commit();
 
     toast({
@@ -195,7 +199,7 @@ export function SignupForm() {
       await processRegistration(userCredential.user, inviteDoc);
     } catch (error: any) {
        console.error("Signup Error:", error);
-      toast({
+       toast({
         variant: "destructive",
         title: t('toast.signUpErrorTitle'),
         description: error.message || t('toast.signUpErrorDescription'),
