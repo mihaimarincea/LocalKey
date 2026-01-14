@@ -51,7 +51,8 @@ export async function seedDatabase(db: Firestore): Promise<{ success: boolean; m
 
         console.log('Seeding invite codes...');
         mockInvites.forEach((invite: Invite) => {
-            const docRef = doc(db, 'invite_codes', invite.id);
+            // Use the actual invite code as the document ID for direct lookup
+            const docRef = doc(db, 'invite_codes', invite.code);
             batch.set(docRef, toTimestamp(invite));
         });
         

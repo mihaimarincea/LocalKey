@@ -112,9 +112,14 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
-      // Allow create for an admin, for initial admin setup, or for a new user with valid invite code.
+      // Allow create for:
+      // 1. Admin creating any user
+      // 2. Initial admin (mihai.marincea@gmail.com) self-registering
+      // 3. Partner self-registering (role='partner')
+      // 4. Regular user with valid invite code
       allow create: if (isAdmin() && isOwner(userId)) ||
                       (isOwner(userId) && request.auth.token.email == 'mihai.marincea@gmail.com') ||
+                      (isOwner(userId) && request.resource.data.role == 'partner') ||
                       (isOwner(userId) &&
                        exists(/databases/$(database)/documents/invite_codes/$(request.resource.data.inviteCode)) &&
                        get(/databases/$(database)/documents/invite_codes/$(request.resource.data.inviteCode)).data.status == 'available');
