@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, type User as FirebaseUser } from 'firebase/auth';
-import { doc, serverTimestamp, collection, query, where, getDocs, writeBatch, DocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { doc, serverTimestamp, collection, query, where, getDocs, writeBatch, DocumentSnapshot, DocumentData, getDoc } from 'firebase/firestore';
 import { useLanguage } from '@/contexts/language-context';
 
 const ADMIN_EMAIL = "mihai.marincea@gmail.com";
@@ -74,11 +74,11 @@ export function SignupForm() {
 
   const validateAndGetInviteDoc = async (code: string): Promise<DocumentSnapshot<DocumentData> | null> => {
     if (!code) return null;
-    const invitesRef = collection(firestore, 'invite_codes');
-    const q = query(invitesRef, where('code', '==', code), where('status', '==', 'available'));
-    const querySnapshot = await getDocs(q);
+    // Security rules use the invite code itself as the document ID
+    const inviteDocRef = doc(firestore, 'invite_codes', code);
+    const docSnap = await getDoc(inviteDocRef);
 
-    if (querySnapshot.empty) {
+    if (!docSnap.exists() || docSnap.data().status !== 'available') {
         toast({
             variant: "destructive",
             title: "Invalid Invite Code",
@@ -86,7 +86,7 @@ export function SignupForm() {
         });
         return null;
     }
-    return querySnapshot.docs[0];
+    return docSnap;
   };
 
   const processRegistration = async (user: FirebaseUser, inviteDoc: DocumentSnapshot<DocumentData> | null) => {
@@ -96,7 +96,7 @@ export function SignupForm() {
 
     // 1. Create user document
     const userDocRef = doc(firestore, "users", user.uid);
-    const newUser = {
+    const newUser: any = {
         id: user.uid,
         email: user.email,
         name: user.displayName || user.email?.split('@')[0] || 'New User',
@@ -105,6 +105,12 @@ export function SignupForm() {
         createdAt: serverTimestamp(),
         inviteCodeCount: isInitialAdmin ? 99 : 3, // Initial invite codes
     };
+    
+    // Add invite code to user document so security rules can validate it on creation
+    if (inviteDoc) {
+        newUser.inviteCode = inviteDoc.id;
+    }
+
     batch.set(userDocRef, newUser);
 
     // Create role document for admin
@@ -152,7 +158,6 @@ export function SignupForm() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      // Special check for Google Sign-Up: ensure the signed-in email matches the intended admin email if trying to bootstrap
       if(isInitialAdmin && result.user.email !== ADMIN_EMAIL) {
           throw new Error("The email used for Google Sign-In does not match the admin email.");
       }
@@ -160,7 +165,7 @@ export function SignupForm() {
     } catch (error: any) {
       console.error("Google Sign Up Error:", error);
       if (auth.currentUser) {
-          await auth.currentUser.delete(); // Clean up partially created user
+          await auth.currentUser.delete().catch(e => console.error("Failed to clean up user", e));
       }
       toast({
         variant: "destructive",

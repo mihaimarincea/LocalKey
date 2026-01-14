@@ -10,6 +10,7 @@ export interface User {
   role: UserRole;
   createdAt: Date | Timestamp;
   inviteCodeCount?: number;
+  inviteCode?: string; // Added for security rule validation
 }
 
 export type PartnerStatus = 'pending' | 'approved' | 'rejected';

@@ -112,8 +112,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
-      // Allow create only if the user is creating their own document, and for non-admins, a valid invite code is provided.
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      // Allow create for an admin, or for a new user if they provide a valid invite code.
+      allow create: if (isAdmin() && isOwner(userId)) || 
+                      (isOwner(userId) && 
+                       exists(/databases/$(database)/documents/invite_codes/$(request.resource.data.inviteCode)) &&
+                       get(/databases/$(database)/documents/invite_codes/$(request.resource.data.inviteCode)).data.status == 'available');
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId) || isAdmin();
     }
@@ -136,16 +139,18 @@ service cloud.firestore {
     // Invite Codes (Root Collection)
     // --------------------------------------------------------------------
     match /invite_codes/{inviteId} {
-      // Anyone can read an invite code document if they know its ID.
-      // Used by the sign-up form to validate the code.
-      allow get: if true;
+      // Allow reading for validation purposes during signup.
+      allow get: if isSignedIn();
       // Listing all invite codes is restricted to admins for security.
       allow list: if isAdmin();
       // An authenticated user can create an invite code for themselves.
-      // This is usually done via a backend function, but the rule allows direct creation.
       allow create: if isSignedIn() && request.resource.data.generatedBy == request.auth.uid;
-      // An invite code can be updated (e.g., to 'used') by an admin or the user redeeming it.
-      allow update: if isAdmin() || (isSignedIn() && request.resource.data.redeemedByUserId == request.auth.uid && resource.data.status == 'available' && request.resource.data.status == 'used');
+      // An invite code can be updated (to 'used') only by the user redeeming it during signup.
+      allow update: if (isAdmin()) || 
+                      (isSignedIn() && 
+                      request.auth.uid == request.resource.data.redeemedByUserId &&
+                      resource.data.status == 'available' && 
+                      request.resource.data.status == 'used');
       // Only the user who generated the code or an admin can delete it.
       allow delete: if isAdmin() || (isSignedIn() && resource.data.generatedBy == request.auth.uid);
     }
@@ -212,5 +217,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
