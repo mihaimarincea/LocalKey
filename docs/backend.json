@@ -8,7 +8,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the User entity."
+          "description": "Unique identifier for the user entity."
         },
         "email": {
           "type": "string",
@@ -19,178 +19,163 @@
           "type": "string",
           "description": "Phone number of the user."
         },
-        "inviteCodes": {
-          "type": "array",
-          "description": "List of invite codes associated with the user.",
-          "items": {
-            "type": "string"
-          }
+        "inviteCode": {
+          "type": "string",
+          "description": "The invite code used to register the user."
+        },
+        "inviterId": {
+          "type": "string",
+          "description": "Reference to the User who invited this user. (Relationship: User 1:N User (invited))"
+        },
+        "inviteCount": {
+          "type": "number",
+          "description": "Number of invites the user has available."
         }
       },
       "required": [
         "id",
-        "email"
+        "email",
+        "phoneNumber"
       ]
     },
     "Partner": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Partner",
       "type": "object",
-      "description": "Represents a partner organization that provides offers.",
+      "description": "Represents a partner organization that offers deals.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Partner entity."
+          "description": "Unique identifier for the partner entity."
         },
         "name": {
           "type": "string",
           "description": "Name of the partner organization."
         },
-        "contactEmail": {
+        "description": {
           "type": "string",
-          "description": "Contact email address for the partner.",
-          "format": "email"
+          "description": "Description of the partner organization."
+        },
+        "location": {
+          "type": "string",
+          "description": "Location of the partner (e.g., address)."
         }
       },
       "required": [
         "id",
-        "name",
-        "contactEmail"
+        "name"
       ]
     },
     "Offer": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Offer",
       "type": "object",
-      "description": "Represents an offer available to users.",
+      "description": "Represents a specific offer available to users.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Offer entity."
+          "description": "Unique identifier for the offer entity."
         },
         "partnerId": {
           "type": "string",
-          "description": "Reference to Partner. (Relationship: Partner 1:N Offer)"
+          "description": "Reference to the Partner offering this deal. (Relationship: Partner 1:N Offer)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the offer."
         },
         "description": {
           "type": "string",
           "description": "Description of the offer."
         },
-        "redemptionLimit": {
-          "type": "number",
-          "description": "Maximum number of times the offer can be redeemed."
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the image for the offer."
+        },
+        "validFrom": {
+          "type": "string",
+          "description": "Date and time the offer becomes valid.",
+          "format": "date-time"
+        },
+        "validUntil": {
+          "type": "string",
+          "description": "Date and time the offer expires.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "partnerId",
-        "description"
+        "title"
       ]
     },
     "Redemption": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Redemption",
       "type": "object",
-      "description": "Represents a user's redemption of an offer.",
+      "description": "Represents a user's redemption of an offer at a partner location.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Redemption entity."
+          "description": "Unique identifier for the redemption event."
         },
         "userId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Redemption)"
+          "description": "Reference to the User who redeemed the offer. (Relationship: User 1:N Redemption)"
         },
         "offerId": {
           "type": "string",
-          "description": "Reference to Offer. (Relationship: Offer 1:N Redemption)"
+          "description": "Reference to the Offer that was redeemed. (Relationship: Offer 1:N Redemption)"
         },
-        "redemptionDate": {
+        "partnerId": {
           "type": "string",
-          "description": "Date and time of the redemption.",
+          "description": "Reference to the Partner where the offer was redeemed. (Relationship: Partner 1:N Redemption)"
+        },
+        "redemptionTime": {
+          "type": "string",
+          "description": "Timestamp of when the offer was redeemed.",
           "format": "date-time"
+        },
+        "deviceId": {
+          "type": "string",
+          "description": "Device identifier used for anti-fraud measures."
         }
       },
       "required": [
         "id",
         "userId",
         "offerId",
-        "redemptionDate"
+        "partnerId",
+        "redemptionTime"
       ]
     },
     "InviteCode": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "InviteCode",
       "type": "object",
-      "description": "Represents an invitation code.",
+      "description": "Represents an invite code that can be used to invite users to the platform.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the InviteCode entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N InviteCode) The user who created the invite code."
-        },
         "code": {
           "type": "string",
-          "description": "The invite code value."
+          "description": "Unique identifier for the invite code entity."
         },
-        "redeemed": {
-          "type": "boolean",
-          "description": "Indicates whether the invite code has been redeemed."
+        "inviterId": {
+          "type": "string",
+          "description": "Reference to the User who created the invite code. (Relationship: User 1:N InviteCode)"
+        },
+        "usedBy": {
+          "type": "string",
+          "description": "Reference to the User who used the invite code."
+        },
+        "createdTime": {
+          "type": "string",
+          "description": "Timestamp of when the invite code was generated.",
+          "format": "date-time"
         }
       },
       "required": [
-        "id",
-        "userId",
-        "code"
-      ]
-    },
-    "DeviceFingerprint": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "DeviceFingerprint",
-      "type": "object",
-      "description": "Represents a device fingerprint for anti-fraud measures.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the DeviceFingerprint entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:1 DeviceFingerprint)"
-        },
-        "fingerprint": {
-          "type": "string",
-          "description": "The device fingerprint value."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "fingerprint"
-      ]
-    },
-    "Admin": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Admin",
-      "type": "object",
-      "description": "Represents an administrator user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Admin entity."
-        },
-        "email": {
-          "type": "string",
-          "description": "Email address of the admin.",
-          "format": "email"
-        }
-      },
-      "required": [
-        "id",
-        "email"
+        "code",
+        "inviterId"
       ]
     }
   },
@@ -209,11 +194,11 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profiles. Path-based ownership for user data.",
+          "description": "Stores user profiles. Uses path-based ownership for data access control.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "Unique identifier for the user."
             }
           ]
         }
@@ -225,11 +210,11 @@
           "schema": {
             "$ref": "#/backend/entities/Partner"
           },
-          "description": "Stores partner information.",
+          "description": "Stores partner organization profiles.",
           "params": [
             {
               "name": "partnerId",
-              "description": "The unique identifier of the partner."
+              "description": "Unique identifier for the partner."
             }
           ]
         }
@@ -241,11 +226,11 @@
           "schema": {
             "$ref": "#/backend/entities/Offer"
           },
-          "description": "Stores offer details. Includes 'partnerId' for authorization independence.",
+          "description": "Stores offer details. Includes denormalized 'partnerId' for authorization independence and efficient querying.",
           "params": [
             {
               "name": "offerId",
-              "description": "The unique identifier of the offer."
+              "description": "Unique identifier for the offer."
             }
           ]
         }
@@ -257,72 +242,56 @@
           "schema": {
             "$ref": "#/backend/entities/Redemption"
           },
-          "description": "Stores user redemptions. Path-based ownership. Includes denormalized 'offerId'.",
+          "description": "Stores redemption records for each user. Includes denormalized 'offerId' and 'partnerId' for easier querying and usage tracking.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "Unique identifier for the user."
             },
             {
               "name": "redemptionId",
-              "description": "The unique identifier of the redemption."
+              "description": "Unique identifier for the redemption event."
             }
           ]
         }
       },
       {
-        "path": "/invite_codes/{inviteCodeId}",
+        "path": "/users/{userId}/inviteCodes/{inviteCodeId}",
         "definition": {
           "entityName": "InviteCode",
           "schema": {
             "$ref": "#/backend/entities/InviteCode"
           },
-          "description": "Stores invite codes. Includes 'userId' of the creator.",
-          "params": [
-            {
-              "name": "inviteCodeId",
-              "description": "The unique identifier of the invite code."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/device_fingerprint/{deviceFingerprintId}",
-        "definition": {
-          "entityName": "DeviceFingerprint",
-          "schema": {
-            "$ref": "#/backend/entities/DeviceFingerprint"
-          },
-          "description": "Stores device fingerprints for fraud detection. Path-based ownership.",
+          "description": "Stores invite codes generated by each user.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "Unique identifier for the user."
             },
             {
-              "name": "deviceFingerprintId",
-              "description": "The unique identifier of the device fingerprint."
+              "name": "inviteCodeId",
+              "description": "Unique identifier for the invite code."
             }
           ]
         }
       },
       {
-        "path": "/roles_admin/{uid}",
+        "path": "/roles_admin/{userId}",
         "definition": {
-          "entityName": "Admin",
+          "entityName": "User",
           "schema": {
-            "$ref": "#/backend/entities/Admin"
+            "$ref": "#/backend/entities/User"
           },
-          "description": "Indicates admin privileges. Existence over content.",
+          "description": "Indicates administrative privileges for a user. Existence of the document grants admin role.",
           "params": [
             {
-              "name": "uid",
-              "description": "The Firebase UID of the admin user."
+              "name": "userId",
+              "description": "Unique identifier for the user."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure authorization independence, clarity, and scalability, adhering to the specified principles. We leverage denormalization to avoid `get()` calls in security rules, ensuring atomic operations and simplifying debugging.\n\n*   **Users:** User data is stored under `/users/{userId}`, which provides path-based ownership for private user data.\n*   **Partners:** Partner data is stored in a flat `/partners/{partnerId}` collection.\n*   **Offers:** Offers are stored in `/offers/{offerId}`, with the `partnerId` denormalized within each offer document.  This allows listing offers without needing to filter based on partner-specific data.\n*   **Redemptions:** Redemptions are stored under `/users/{userId}/redemptions/{redemptionId}`, providing path-based ownership, aiding in usage tracking and fraud prevention. Each document also denormalizes the `offerId` for easy lookup. We could also create an aggregate collection of `redemptions_by_offer/{offerId}/redemptions/{redemptionId}` to facilitate queries across all redemptions for a given offer by partner, while maintaining a more granular level of ownership by user.\n*   **InviteCodes:** Invite codes are stored under `/invite_codes/{inviteCodeId}`. Each document includes the `userId` of the user who created the invite code. The separate collection allows easy querying and management of invite codes.\n*   **DeviceFingerprints:** Device fingerprints are stored under `/users/{userId}/device_fingerprint/{deviceFingerprintId}` to prevent fraud. The structure reflects the 1:1 relationship between users and device fingerprints.\n*   **Admins:** Admin UIDs are stored in `/roles_admin/{uid}` using the Existence over Content pattern.  The presence of a document at this path grants admin privileges, which is checked in security rules.\n\nThis structure facilitates QAPs by:\n\n*   Segregating data with different access needs (e.g., public vs. private data).\n*   Using path-based ownership for user-specific data (e.g., `/users/{userId}/redemptions/{redemptionId}`).\n*   Employing a membership map (existence over content) for global roles (admins in `/roles_admin/{uid}`)."
+    "reasoning": "The Firestore structure is designed to ensure security, scalability, and ease of debugging, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs. The core strategy revolves around denormalization to eliminate `get()` calls in security rules, promoting atomic operations and simplifying access control.\n\n1.  **Users Collection:** Stores user profiles. This uses path-based ownership for user-related data.\n2.  **Partners Collection:** Stores partner organization profiles.\n3.  **Offers Collection:** Stores offer details, denormalizing partner information (specifically, the `partnerId`) to ensure that offers can be queried and listed efficiently without needing to access partner documents directly.  This supports QAPs as listing offers doesn't require complex filtering based on partner data.\n4.  **Redemptions Collection:** Stores redemption records, using path-based ownership under users to easily track user redemptions. The `offerId` and `partnerId` are denormalized to facilitate usage tracking and fraud detection.\n5.  **InviteCodes Collection:** Stores invite codes generated by users, using path-based ownership to easily track the codes generated and their usage.\n6.  **Roles: Admin:** Dedicated collections `/roles_admin/{uid}` to manage admin permissions. Rules will simply check for the existence of a document to grant admin access.\n\nThis design achieves **Authorization Independence** by denormalizing the `partnerId` into the `Offer` documents.  It supports **QAPs** by segregating data (e.g., offers in a single collection) and using denormalized authorization fields, allowing for secure and efficient `list` operations. Path-based ownership is heavily utilized for user-specific data (redemptions, invite codes), making security rules straightforward."
   }
 }
