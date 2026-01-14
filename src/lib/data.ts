@@ -45,6 +45,7 @@ export const mockPartners: Partner[] = [
     createdAt: Timestamp.fromDate(new Date('2023-01-10T08:00:00Z')),
     offerCount: 1,
     totalRedemptions: 120,
+    status: 'approved'
   },
 ];
 
