@@ -112,9 +112,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
-      // Allow create for an admin, or for a new user if they provide a valid invite code.
-      allow create: if (isAdmin() && isOwner(userId)) || 
-                      (isOwner(userId) && 
+      // Allow create for an admin, for initial admin setup, or for a new user with valid invite code.
+      allow create: if (isAdmin() && isOwner(userId)) ||
+                      (isOwner(userId) && request.auth.token.email == 'mihai.marincea@gmail.com') ||
+                      (isOwner(userId) &&
                        exists(/databases/$(database)/documents/invite_codes/$(request.resource.data.inviteCode)) &&
                        get(/databases/$(database)/documents/invite_codes/$(request.resource.data.inviteCode)).data.status == 'available');
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
@@ -195,12 +196,13 @@ service cloud.firestore {
      * @description Secures the admin role definitions.
      * @path /roles_admin/{userId}
      * @allow An admin user can (list) other admins.
+     * @allow The initial admin (mihai.marincea@gmail.com) can create their own admin role.
      * @deny A regular user cannot (create) a document for themselves to become an admin.
      * @principle Secures role-granting actions. Only existing admins can modify roles.
      */
     match /roles_admin/{userId} {
       allow get, list: if isAdmin();
-      allow create: if isAdmin();
+      allow create: if isAdmin() || (request.auth.token.email == 'mihai.marincea@gmail.com' && userId == request.auth.uid);
       allow update, delete: if isExistingAdmin();
     }
     
