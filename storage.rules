@@ -3,14 +3,21 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // Helper function to check if the user is an authenticated partner.
+    // It verifies that a document with the user's UID exists in the `roles_partner` collection.
+    // This is more secure and efficient than checking the `partners` collection directly.
     function isPartner(userId) {
       return request.auth != null 
         && request.auth.uid == userId 
-        && exists(/databases/$(database)/documents/partners/$(userId));
+        && exists(/databases/$(database)/documents/roles_partner/$(userId));
     }
 
+    // Rules for offer images.
+    // Images are stored in a path structured as /offer_images/{userId}/{fileName}.
     match /offer_images/{userId}/{allPaths=**} {
+      // Anyone can read images, as they are public content for offers.
       allow read: if true;
+      // Only an authenticated partner can write (upload/update/delete) to their own folder.
       allow write: if isPartner(userId);
     }
   }

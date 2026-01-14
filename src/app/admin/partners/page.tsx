@@ -49,12 +49,10 @@ export default function AdminPartnersPage() {
     const partnerRef = doc(firestore, 'partners', partnerId);
     batch.update(partnerRef, { status });
 
+    const roleRef = doc(firestore, 'roles_partner', partnerId);
     if (status === 'approved') {
-        const roleRef = doc(firestore, 'roles_partner', partnerId);
         batch.set(roleRef, { role: 'partner' });
-    } else if (status === 'rejected') {
-        // If a partner is rejected, we can remove their partner role if it exists
-        const roleRef = doc(firestore, 'roles_partner', partnerId);
+    } else { // For 'rejected' or 'pending', we ensure the role is removed.
         batch.delete(roleRef);
     }
 
